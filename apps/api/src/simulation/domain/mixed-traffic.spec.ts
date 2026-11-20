@@ -10,6 +10,7 @@ import {
   buildMixedTrafficScenario,
   TRAFFIC_CAR_COUNT,
   TRAFFIC_TEMPLATE_COUNT,
+  reachableTrafficTopology,
 } from './mixed-traffic.js';
 
 function makeRoute(id: string, latitude: number, longitude: number): DrivingRoute {
@@ -103,6 +104,66 @@ describe('mixed traffic scenario', () => {
     const scene = makeScenario();
     expect(scene.topologies).toHaveLength(26);
     expect(scene.topologies.every((topology) => topology.nodes.length === 0)).toBe(true);
+  });
+
+  it('keeps trustworthy original-route OSM identities after the car starting point', () => {
+    const withNodes = templates.map((route, templateIndex) => ({
+      ...route,
+      topologyNodes: route.coordinates.slice(1, -1).map(([longitude, latitude], index) => ({
+        id: String(10000 + templateIndex * 100 + index),
+        position: { latitude, longitude },
+      })),
+    }));
+    const ambulanceNodes = {
+      ...ambulance,
+      topologyNodes: ambulance.coordinates.slice(1, -1).map(([longitude, latitude], index) => ({
+        id: String(20000 + index),
+        position: { latitude, longitude },
+      })),
+    };
+    const scene = buildMixedTrafficScenario(ambulanceNodes, withNodes);
+    expect(scene.topologies).toHaveLength(26);
+    expect(scene.topologies[0].nodes).toEqual(ambulanceNodes.topologyNodes);
+    expect(scene.topologies.slice(1).some((route) => route.nodes.length > 0)).toBe(true);
+    for (const [index, car] of scene.initialSimulation.vehicles.slice(1).entries()) {
+      const templateIndex = scene.profiles[index].templateIndex;
+      const available = scene.topologies[index + 1].nodes;
+      const source = withNodes[templateIndex].topologyNodes;
+      const positions = withNodes[templateIndex].coordinates;
+      for (const node of available) {
+        expect(source.some((original) => original.id === node.id)).toBe(true);
+        const originalIndex = positions.findIndex(
+          ([longitude, latitude]) =>
+            Math.abs(longitude - node.position.longitude) < 1e-10 &&
+            Math.abs(latitude - node.position.latitude) < 1e-10,
+        );
+        const startLongitude = car.vehicle.position.longitude;
+        expect(originalIndex).toBeGreaterThanOrEqual(1);
+        expect(node.position.longitude).toBeGreaterThanOrEqual(startLongitude - 1e-8);
+      }
+    }
+  });
+
+  it('rejects ambiguous or incompatible route-to-topology alignment', () => {
+    const withNodes = {
+      ...templates[0],
+      topologyNodes: [
+        { id: '101', position: { latitude: 39.682, longitude: -75.755 } },
+      ],
+    };
+    expect(reachableTrafficTopology(withNodes, 3)).toEqual([]);
+    expect(reachableTrafficTopology({
+      ...withNodes,
+      coordinates: [[-75.755, 39.682]],
+    }, 0)).toEqual([]);
+    expect(reachableTrafficTopology({
+      ...withNodes,
+      coordinates: [
+        ...withNodes.coordinates.slice(0, 3),
+        withNodes.coordinates[0],
+        ...withNodes.coordinates.slice(4),
+      ],
+    }, 0)).toEqual([]);
   });
 
   it('does not mutate the original OSRM route pool', () => {

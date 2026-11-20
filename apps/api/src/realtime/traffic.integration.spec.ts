@@ -9,6 +9,9 @@ import { OsrmClient } from '../routing/osrm-client.js';
 import type { GeoPosition } from '../vehicles/domain/vehicle.js';
 import { DemoStateService } from './demo-state.service.js';
 import { RealtimeModule } from './realtime.module.js';
+import { DemoAccessService } from './demo-access.service.js';
+import { DriversGateway } from './drivers.gateway.js';
+import { io, type Socket as ClientSocket } from 'socket.io-client';
 
 const KEY = 'local-traffic-test-operator-key';
 const originalKey = process.env.EVRAS_DEMO_OPERATOR_KEY;
@@ -44,6 +47,9 @@ describe('25-car traffic API', () => {
   let app: INestApplication;
   let url: string;
   let state: DemoStateService;
+  let access: DemoAccessService;
+  let gateway: DriversGateway;
+  const clients: ClientSocket[] = [];
   let getDrivingRoute: ReturnType<typeof vi.fn>;
 
   const post = async (path: string, body: unknown, authenticated = true) =>
@@ -73,9 +79,13 @@ describe('25-car traffic API', () => {
     const address = (app.getHttpServer() as Server).address() as AddressInfo;
     url = `http://127.0.0.1:${address.port}`;
     state = app.get(DemoStateService);
+    access = app.get(DemoAccessService);
+    gateway = app.get(DriversGateway);
   });
 
   afterEach(async () => {
+    for (const client of clients) client.disconnect();
+    clients.length = 0;
     await app.close();
     if (originalKey === undefined) delete process.env.EVRAS_DEMO_OPERATOR_KEY;
     else process.env.EVRAS_DEMO_OPERATOR_KEY = originalKey;
@@ -106,7 +116,7 @@ describe('25-car traffic API', () => {
     expect(payload.active).toBe(true);
     expect(payload.seed).toBe(123);
     expect(payload.source).toBe('OSRM');
-    expect(payload.encounterEvaluation).toBe('DEFERRED_TO_10B');
+    expect(payload.encounterEvaluation).toBe('TOPOLOGY_FILTERED');
     expect(payload.snapshot.vehicles).toHaveLength(26);
     expect(payload.snapshot.vehicles.filter((v) => v.kind === 'CIVILIAN')).toHaveLength(25);
     expect(getDrivingRoute).toHaveBeenCalledTimes(6);
@@ -129,7 +139,7 @@ describe('25-car traffic API', () => {
     };
     expect(data.timeMs).toBe(1000);
     expect(data.snapshot.vehicles).toHaveLength(26);
-    expect(data.encounterEvaluation).toBe('DEFERRED_TO_10B');
+    expect(data.encounterEvaluation).toBe('TOPOLOGY_FILTERED');
 
     const reset = await post('/demo/reset', {});
     const snapshot = await reset.json() as { timeMs: number; vehicles: unknown[] };
@@ -142,6 +152,93 @@ describe('25-car traffic API', () => {
     getDrivingRoute.mockRejectedValueOnce(new Error('Unavailable'));
     expect((await post('/demo/traffic', { seed: 7 })).status).toBe(502);
     expect(state.getOperatorSnapshot()).toEqual(prior);
+  });
+
+  it('issues a scoped session for CAR-025, not arbitrary IDs', async () => {
+    const session = await post('/demo/sessions', { driverId: 'CAR-025' });
+    expect(session.status).toBe(201);
+    const body = await session.json() as { driverId: string; token: string };
+    expect(body.driverId).toBe('CAR-025');
+    expect(access.resolveDriver(body.token)).toBe('CAR-025');
+    expect(access.resolveDriver('bogus')).toBeNull();
+    expect((await post('/demo/sessions', { driverId: 'CAR-026' })).status).toBe(400);
+    expect((await post('/demo/sessions', { driverId: 'CAR-25' })).status).toBe(400);
+  });
+
+  it('delivers traffic ticks to a CAR-025 session without exposing other civilian states', async () => {
+    expect((await post('/demo/traffic', {})).status).toBe(201);
+    const token = access.issueDriverToken('CAR-025');
+    const client = io(`${url}/drivers`, {
+      auth: { token },
+      transports: ['websocket'],
+      autoConnect: false,
+      reconnection: false,
+    });
+    clients.push(client);
+    const initial = new Promise<{ driver: { id: string }; alerts: unknown[] }>((resolve, reject) => {
+      client.once('simulation:snapshot', resolve);
+      client.once('connect_error', reject);
+    });
+    client.connect();
+    const snapshot = await initial;
+    expect(snapshot.driver.id).toBe('CAR-025');
+    expect(Object.keys(snapshot)).not.toContain('vehicles');
+    expect(snapshot.alerts).toEqual([]);
+
+    const tickPromise = new Promise<{ driver: { id: string }; timeMs: number }>((resolve, reject) => {
+      client.once('simulation:tick', resolve);
+      client.once('connect_error', reject);
+    });
+    expect((await post('/demo/advance', { deltaMs: 1000 })).status).toBe(201);
+    const tick = await tickPromise;
+    expect(tick.driver.id).toBe('CAR-025');
+    expect(tick.timeMs).toBe(1000);
+  });
+
+  it('sends a warning only to its authenticated driver room', async () => {
+    expect((await post('/demo/traffic', {})).status).toBe(201);
+    const connect = (driverId: string) => {
+      const client = io(`${url}/drivers`, {
+        auth: { token: access.issueDriverToken(driverId) },
+        transports: ['websocket'],
+        autoConnect: false,
+        reconnection: false,
+      });
+      clients.push(client);
+      const done = new Promise<void>((resolve, reject) => {
+        client.once('session:ready', () => resolve());
+        client.once('connect_error', reject);
+      });
+      client.connect();
+      return { client, done };
+    };
+    const first = connect('CAR-001');
+    const last = connect('CAR-025');
+    await Promise.all([first.done, last.done]);
+    const otherAlerts: unknown[] = [];
+    first.client.on('alert:created', (alert: unknown) => { otherAlerts.push(alert); });
+    const delivered = new Promise<{ civilianVehicleId: string }>((resolve) => {
+      last.client.once('alert:created', resolve);
+    });
+    gateway.publishAlertEvents([{
+      type: 'CREATED',
+      alert: {
+        id: 'encounter:AMB-001:CAR-025',
+        emergencyVehicleId: 'AMB-001',
+        civilianVehicleId: 'CAR-025',
+        reason: 'CROSSING',
+        classification: 'UNVERIFIED_ROUTE_ENCOUNTER',
+        location: { latitude: 39.683, longitude: -75.75 },
+        emergencyEtaSeconds: 5,
+        civilianEtaSeconds: 5,
+        etaDifferenceSeconds: 0,
+        firstDetectedAtMs: 1000,
+        lastUpdatedAtMs: 1000,
+      },
+    }]);
+    expect((await delivered).civilianVehicleId).toBe('CAR-025');
+    await new Promise((resolve) => setTimeout(resolve, 25));
+    expect(otherAlerts).toEqual([]);
   });
 
   it('does not change existing two-vehicle route-scenario behavior', async () => {

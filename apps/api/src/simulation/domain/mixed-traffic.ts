@@ -1,4 +1,4 @@
-import type { VehicleRoadTopology } from '../../detection/domain/road-topology.js';
+import type { RoadTopologyNode, VehicleRoadTopology } from '../../detection/domain/road-topology.js';
 import type { DrivingRoute } from '../../routing/osrm-client.js';
 import type { ScenarioRoute } from '../../routing/route-scenario.js';
 import type { GeoPosition } from '../../vehicles/domain/vehicle.js';
@@ -36,7 +36,7 @@ export interface MixedTrafficScenario {
   readonly network: RoadNetwork;
   readonly initialSimulation: SimulationState;
   readonly routes: readonly ScenarioRoute[];
-  /** Car node evidence is deliberately unavailable until Milestone 10B. */
+  /** Per-car OSM topology limited to the portion of the route still ahead. */
   readonly topologies: readonly VehicleRoadTopology[];
   readonly profiles: readonly TrafficDriverProfile[];
   readonly seed: number;
@@ -108,6 +108,8 @@ function remainingRoute(
   readonly routeIds: string[];
   readonly startingPoint: GeoPosition;
   readonly extraRoad?: RoadSegment;
+  /** First original route vertex that the vehicle can still reach. */
+  readonly firstReachableVertex: number;
 } {
   const roads = template.segmentIds.map((id) => getRoad(network, id));
   const distance = roads.reduce((total, road) => total + roadLengthMeters(road), 0);
@@ -138,6 +140,7 @@ function remainingRoute(
     return {
       routeIds,
       startingPoint: { ...road.points[0] },
+      firstReachableVertex: index,
     };
   }
 
@@ -155,7 +158,60 @@ function remainingRoute(
     routeIds: [extraRoad.id, ...template.segmentIds.slice(index + 1)],
     startingPoint: { ...points[0] },
     extraRoad,
+    firstReachableVertex: index + 1,
   };
+}
+
+/**
+ * Match OSRM node positions to the original route vertices *before* removing
+ * the portion already behind a simulated driver. Never guess an index.
+ *
+ * An ambiguous loop, a non-1:1 segment mapping, or inconsistent coordinates
+ * yields no evidence. A missing node is not proof of a disconnected road.
+ */
+export function reachableTrafficTopology(
+  route: DrivingRoute,
+  firstReachableVertex: number,
+): readonly RoadTopologyNode[] {
+  const raw = route.topologyNodes;
+  if (!raw || raw.length === 0) return [];
+
+  // Current OSRM client produces exactly one two-point road per geometry edge.
+  // Other route representations must be explicitly handled before trusting IDs.
+  if (
+    route.coordinates.length !== route.segmentIds.length + 1 ||
+    !Number.isInteger(firstReachableVertex) ||
+    firstReachableVertex < 0 ||
+    firstReachableVertex >= route.coordinates.length
+  ) return [];
+
+  for (let i = 0; i < route.segmentIds.length; i++) {
+    const road = getRoad(route.roadNetwork, route.segmentIds[i]);
+    if (road.points.length !== 2) return [];
+    const from = { latitude: route.coordinates[i][1], longitude: route.coordinates[i][0] };
+    const to = { latitude: route.coordinates[i + 1][1], longitude: route.coordinates[i + 1][0] };
+    if (distanceMeters(from, road.points[0]) > 0.05 ||
+        distanceMeters(to, road.points[1]) > 0.05) return [];
+  }
+
+  const matched: { index: number; node: RoadTopologyNode }[] = [];
+  let previousIndex = -1;
+  for (const node of raw) {
+    const indices: number[] = [];
+    for (let i = 0; i < route.coordinates.length; i++) {
+      const point = { latitude: route.coordinates[i][1], longitude: route.coordinates[i][0] };
+      if (distanceMeters(point, node.position) <= 0.05) indices.push(i);
+    }
+    // Repeated coordinates would make it impossible to prove which visit the
+    // evidence belongs to. Also refuse non-monotonic annotations.
+    if (indices.length !== 1 || indices[0] <= previousIndex) return [];
+    previousIndex = indices[0];
+    matched.push({ index: previousIndex, node });
+  }
+
+  return matched
+    .filter(({ index }) => index >= firstReachableVertex)
+    .map(({ node }) => ({ id: node.id, position: { ...node.position } }));
 }
 
 function summariseRoute(
@@ -225,6 +281,10 @@ export function buildMixedTrafficScenario(
   ];
   const extraRoads: RoadSegment[] = [];
   const profiles: TrafficDriverProfile[] = [];
+  const topologies: VehicleRoadTopology[] = [{
+    vehicleId: 'AMB-001',
+    nodes: reachableTrafficTopology(ambulanceRoute, 0),
+  }];
 
   for (let index = 0; index < TRAFFIC_CAR_COUNT; index++) {
     const id = `CAR-${String(index + 1).padStart(3, '0')}`;
@@ -242,6 +302,10 @@ export function buildMixedTrafficScenario(
     if (starting.extraRoad) extraRoads.push(starting.extraRoad);
 
     profiles.push({ id, cruiseSpeedMps, phaseSeconds, templateIndex });
+    topologies.push({
+      vehicleId: id,
+      nodes: reachableTrafficTopology(template, starting.firstReachableVertex),
+    });
     plans.push({
       vehicle: {
         id,
@@ -260,10 +324,6 @@ export function buildMixedTrafficScenario(
   const routes = plans.map((plan) =>
     summariseRoute(network, plan.vehicle.id, plan.route, plan.vehicle.speedMps),
   );
-
-  // There is no trustworthy OSM-node-to-truncated-route mapping yet.
-  // 10B will add per-car topology and alert validation; fail closed now.
-  const topologies = plans.map((plan) => ({ vehicleId: plan.vehicle.id, nodes: [] }));
 
   return { network, initialSimulation, routes, topologies, profiles, seed };
 }

@@ -211,7 +211,7 @@ export class DemoSimulationService {
       seed: this.traffic?.seed ?? null,
       civilianCount: this.traffic ? TRAFFIC_CAR_COUNT : 0,
       routeTemplateCount: this.traffic ? 5 : 0,
-      encounterEvaluation: this.traffic ? 'DEFERRED_TO_10B' : null,
+      encounterEvaluation: this.traffic ? 'TOPOLOGY_FILTERED' : null,
     };
   }
 
@@ -219,7 +219,7 @@ export class DemoSimulationService {
    * Load six real road routes once, then build 25 deterministically placed
    * synthetic civilian vehicles. Any OSRM failure preserves the old scene.
    *
-   * Traffic collision avoidance and mass warning selection belong to 10B.
+   * Each car is subsequently evaluated independently using topology evidence.
    */
   async loadMixedTrafficScenario(seed = DEFAULT_TRAFFIC_SEED) {
     if (this.loading) {
@@ -297,18 +297,18 @@ export class DemoSimulationService {
       .filter((entry) => entry.vehicle.kind === 'CIVILIAN')
       .map((entry) => ({ network: this.network, state: entry }));
 
-    // The traffic population is intentionally movement-only in 10A.
-    // We cannot claim reliable topology-aware warnings for cars whose
-    // route starts have been truncated until 10B validates their nodes.
-    const geometricCandidates = this.traffic
-      ? []
-      : detectEncounters({ network: this.network, state: emergency }, civilians);
-
-    // The controlled demo retains its established behavior. For real OSRM
-    // roads, unsupported geometry crossings cannot create driver alerts.
-    const encounters = this.traffic
-      ? []
-      : selectAlertableEncounters(geometricCandidates, this.source, this.topologies);
+    // Every civilian is evaluated independently, including all 25 traffic cars.
+    // OSRM mode fails closed: geometric proximity is insufficient without
+    // compatible OSM node or shared-edge evidence at the conflict location.
+    const geometricCandidates = detectEncounters(
+      { network: this.network, state: emergency },
+      civilians,
+    );
+    const encounters = selectAlertableEncounters(
+      geometricCandidates,
+      this.source,
+      this.topologies,
+    );
 
     const events = this.state.update(next, encounters);
     this.simulation = next;
@@ -320,7 +320,7 @@ export class DemoSimulationService {
       timeMs: next.timeMs,
       encounterCount: encounters.length,
       suppressedCandidateCount: geometricCandidates.length - encounters.length,
-      ...(this.traffic ? { encounterEvaluation: 'DEFERRED_TO_10B' } : {}),
+      ...(this.traffic ? { encounterEvaluation: 'TOPOLOGY_FILTERED' } : {}),
       events,
       snapshot: this.state.getOperatorSnapshot(),
     };
