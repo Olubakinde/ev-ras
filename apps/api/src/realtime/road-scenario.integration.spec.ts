@@ -139,6 +139,12 @@ import {
         (segment) => segment.id,
       ),
       snappedStart: { ...points[0] },
+      topologyNodes: points.map((point, index) => ({
+        id: point.latitude === B.latitude && point.longitude === B.longitude
+          ? '102'
+          : String((id === 'AMB-001' ? 1000 : id === 'CAR-001' ? 2000 : 3000) + index + 1),
+        position: { ...point },
+      })),
       snappedEnd: {
         ...points[points.length - 1],
       },
@@ -471,6 +477,20 @@ import {
       ).toBeNull();
     });
 
+    it('suppresses an OSRM crossing without topology evidence', async () => {
+      getRoute.mockImplementationOnce(async (origin, destination, routeId) => {
+        const route = await fakeRoute(origin, destination, routeId);
+        return { ...route, topologyNodes: undefined };
+      });
+    
+      const response = await post('/demo/route-scenario', requestBody());
+      expect(response.status).toBe(201);
+      const result = simulation.advance(1000);
+      expect(result.encounterCount).toBe(0);
+      expect(result.suppressedCandidateCount).toBe(1);
+      expect(result.events).toEqual([]);
+    });
+    
     it('advances vehicles on the newly loaded road network', async () => {
       const response = await post(
         '/demo/route-scenario',

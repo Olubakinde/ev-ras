@@ -1,4 +1,4 @@
-
+import type { RoadTopologyNode } from '../detection/domain/road-topology.js';
 import type { GeoPosition } from '../vehicles/domain/vehicle.js';
 import {
   createRoadNetwork,
@@ -6,6 +6,8 @@ import {
   type RoadNetwork,
   type RoadSegment,
 } from '../simulation/domain/road-network.js';
+
+import { parseOsrmNodeAnnotations } from './osrm-node-annotations.js';
 
 export interface DrivingRoute {
   readonly distanceMeters: number;
@@ -15,23 +17,17 @@ export interface DrivingRoute {
   readonly segmentIds: readonly string[];
   readonly snappedStart: GeoPosition;
   readonly snappedEnd: GeoPosition;
+  /** Undefined means OSRM did not supply unambiguously aligned node evidence. */
+  readonly topologyNodes?: readonly RoadTopologyNode[];
 }
 
 const MIN_SEGMENT_LENGTH_M = 0.05;
 
-function isRecord(
-  value: unknown,
-): value is Record<string, unknown> {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    !Array.isArray(value)
-  );
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function validatePosition(
-  position: GeoPosition,
-): void {
+function validatePosition(position: GeoPosition): void {
   if (
     !position ||
     !Number.isFinite(position.latitude) ||
@@ -45,9 +41,7 @@ function validatePosition(
   }
 }
 
-function parseCoordinates(
-  raw: unknown,
-): GeoPosition[] {
+function parseCoordinates(raw: unknown): GeoPosition[] {
   if (!Array.isArray(raw) || raw.length < 2) {
     throw new Error('OSRM returned invalid route geometry');
   }
@@ -60,24 +54,18 @@ function parseCoordinates(
     }
 
     const [longitude, latitude] = pair;
-
-    if (
-      typeof latitude !== 'number' ||
-      typeof longitude !== 'number'
-    ) {
+    if (typeof latitude !== 'number' || typeof longitude !== 'number') {
       throw new Error('Invalid OSRM coordinate values');
     }
 
     const position = { latitude, longitude };
     validatePosition(position);
 
-    // Remove adjacent duplicate or near-duplicate points.
+    // The simulation already strips near-duplicate route vertices.
     const previous = points[points.length - 1];
-
     if (
       !previous ||
-      distanceMeters(previous, position) >=
-        MIN_SEGMENT_LENGTH_M
+      distanceMeters(previous, position) >= MIN_SEGMENT_LENGTH_M
     ) {
       points.push(position);
     }
@@ -94,8 +82,7 @@ export class OsrmClient {
   constructor(
     private readonly request: typeof fetch = globalThis.fetch,
     private readonly baseUrl: string =
-      process.env.OSRM_BASE_URL ??
-      'https://router.project-osrm.org',
+      process.env.OSRM_BASE_URL ?? 'https://router.project-osrm.org',
   ) {}
 
   async getDrivingRoute(
@@ -113,27 +100,21 @@ export class OsrmClient {
     const start = `${origin.longitude},${origin.latitude}`;
     const end = `${destination.longitude},${destination.latitude}`;
 
-    const url = new URL(
-      `/route/v1/driving/${start};${end}`,
-      this.baseUrl,
-    );
-
+    const url = new URL(`/route/v1/driving/${start};${end}`, this.baseUrl);
     url.searchParams.set('overview', 'full');
     url.searchParams.set('geometries', 'geojson');
     url.searchParams.set('steps', 'false');
+    url.searchParams.set('annotations', 'nodes');
 
     const response = await this.request(url.toString(), {
       signal: AbortSignal.timeout(8_000),
     });
 
     if (!response.ok) {
-      throw new Error(
-        `OSRM request failed with HTTP ${response.status}`,
-      );
+      throw new Error(`OSRM request failed with HTTP ${response.status}`);
     }
 
     const payload: unknown = await response.json();
-
     if (
       !isRecord(payload) ||
       payload.code !== 'Ok' ||
@@ -144,7 +125,6 @@ export class OsrmClient {
     }
 
     const route: unknown = payload.routes[0];
-
     if (
       !isRecord(route) ||
       !Number.isFinite(route.distance) ||
@@ -159,14 +139,21 @@ export class OsrmClient {
       throw new Error('OSRM returned invalid route data');
     }
 
-    const points = parseCoordinates(
-      route.geometry.coordinates,
+    // Node IDs are mapped against the RAW route geometry, never the
+    // deduplicated simulation geometry. If deduplication changes the count,
+    // discard the node evidence rather than risk mismatched indexes.
+    const rawCoordinates: unknown = route.geometry.coordinates;
+    const originalTopology = parseOsrmNodeAnnotations(
+      rawCoordinates,
+      route.legs,
     );
+    const points = parseCoordinates(rawCoordinates);
+    const topologyNodes =
+      Array.isArray(rawCoordinates) && rawCoordinates.length === points.length
+        ? originalTopology
+        : undefined;
 
-    // Convert route geometry into connected directed segments
-    // understood by our existing simulation engine.
     const segments: RoadSegment[] = [];
-
     for (let i = 1; i < points.length; i++) {
       segments.push({
         id: `${routeId}:${i - 1}`,
@@ -175,18 +162,17 @@ export class OsrmClient {
     }
 
     const roadNetwork = createRoadNetwork(segments);
-
     return {
       distanceMeters: route.distance,
       durationSeconds: route.duration,
       coordinates: points.map(
-        (point) =>
-          [point.longitude, point.latitude] as const,
+        (point) => [point.longitude, point.latitude] as const,
       ),
       roadNetwork,
       segmentIds: segments.map((segment) => segment.id),
       snappedStart: { ...points[0] },
       snappedEnd: { ...points[points.length - 1] },
+      ...(topologyNodes ? { topologyNodes } : {}),
     };
   }
 }

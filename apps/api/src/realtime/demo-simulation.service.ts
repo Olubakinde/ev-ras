@@ -1,323 +1,259 @@
+import {
+  BadGatewayException,
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 
 import {
-    BadGatewayException,
-    BadRequestException,
-    ConflictException,
-    Injectable,
-    Logger,
-  } from '@nestjs/common';
+  detectEncounters,
+  type VehicleJourney,
+} from '../detection/domain/encounter-detector.js';
 
-  import {
-    detectEncounters,
-    type VehicleJourney,
-  } from '../detection/domain/encounter-detector.js';
+import { selectAlertableEncounters } from '../detection/domain/road-aware-encounters.js';
 
-  import { OsrmClient } from '../routing/osrm-client.js';
+import type {
+  VehicleRoadTopology,
+} from '../detection/domain/road-topology.js';
 
-  import {
-    buildRoadScenario,
-    type RoadScenario,
-    type RoutedVehicle,
-    type ScenarioRoute,
-  } from '../routing/route-scenario.js';
+import { OsrmClient } from '../routing/osrm-client.js';
 
-  import {
-    createRoadNetwork,
-    type RoadNetwork,
-  } from '../simulation/domain/road-network.js';
+import {
+  buildRoadScenario,
+  type RoadScenario,
+  type RoutedVehicle,
+  type ScenarioRoute,
+} from '../routing/route-scenario.js';
 
-  import {
-    advanceSimulation,
-    createSimulation,
-    type SimulationState,
-  } from '../simulation/domain/simulation.js';
+import {
+  createRoadNetwork,
+  type RoadNetwork,
+} from '../simulation/domain/road-network.js';
 
-  import type {
-    RoadScenarioVehicleRequest,
-  } from './road-scenario-request.js';
+import {
+  advanceSimulation,
+  createSimulation,
+  type SimulationState,
+} from '../simulation/domain/simulation.js';
 
-  import { DemoStateService } from './demo-state.service.js';
-  import { DriversGateway } from './drivers.gateway.js';
+import type {
+  RoadScenarioVehicleRequest,
+} from './road-scenario-request.js';
 
-  const A = {
-    latitude: 39.683,
-    longitude: -75.751,
-  };
+import { DemoStateService } from './demo-state.service.js';
+import { DriversGateway } from './drivers.gateway.js';
 
-  const B = {
-    latitude: 39.683,
-    longitude: -75.75,
-  };
+const A = { latitude: 39.683, longitude: -75.751 };
+const B = { latitude: 39.683, longitude: -75.75 };
+const C = { latitude: 39.683, longitude: -75.749 };
+const SOUTH = { latitude: 39.682, longitude: -75.75 };
+const NORTH = { latitude: 39.684, longitude: -75.75 };
+const PARALLEL_START = { latitude: 39.6833, longitude: -75.751 };
+const PARALLEL_END = { latitude: 39.6833, longitude: -75.749 };
 
-  const C = {
-    latitude: 39.683,
-    longitude: -75.749,
-  };
+@Injectable()
+export class DemoSimulationService {
+  private readonly logger = new Logger(DemoSimulationService.name);
 
-  const SOUTH = {
-    latitude: 39.682,
-    longitude: -75.75,
-  };
+  private network: RoadNetwork = createRoadNetwork([
+    { id: 'AMB_ROUTE', points: [A, B, C] },
+    { id: 'CAR_CROSS', points: [SOUTH, B, NORTH] },
+    { id: 'CAR_PARALLEL', points: [PARALLEL_START, PARALLEL_END] },
+  ]);
 
-  const NORTH = {
-    latitude: 39.684,
-    longitude: -75.75,
-  };
+  private simulation: SimulationState;
+  private initialSimulation: SimulationState;
+  private source: 'DEMO' | 'OSRM' = 'DEMO';
+  private routes: readonly ScenarioRoute[] = [];
+  private topologies: readonly VehicleRoadTopology[] = [];
+  private loading = false;
 
-  const PARALLEL_START = {
-    latitude: 39.6833,
-    longitude: -75.751,
-  };
+  constructor(
+    private readonly state: DemoStateService,
+    private readonly gateway: DriversGateway,
+    private readonly osrm: OsrmClient,
+  ) {
+    this.simulation = this.createInitialSimulation();
+    this.initialSimulation = this.simulation;
+    this.state.initialize(this.simulation);
+  }
 
-  const PARALLEL_END = {
-    latitude: 39.6833,
-    longitude: -75.749,
-  };
-
-  @Injectable()
-  export class DemoSimulationService {
-    private readonly logger = new Logger(
-      DemoSimulationService.name,
-    );
-
-    private network: RoadNetwork = createRoadNetwork([
+  private createInitialSimulation(): SimulationState {
+    return createSimulation(this.network, 0, [
       {
-        id: 'AMB_ROUTE',
-        points: [A, B, C],
+        vehicle: {
+          id: 'AMB-001',
+          kind: 'EMERGENCY',
+          position: A,
+          speedMps: 15,
+          headingDeg: 90,
+          timestampMs: 0,
+        },
+        route: ['AMB_ROUTE'],
       },
       {
-        id: 'CAR_CROSS',
-        points: [SOUTH, B, NORTH],
+        vehicle: {
+          id: 'CAR-001',
+          kind: 'CIVILIAN',
+          position: SOUTH,
+          speedMps: 20,
+          headingDeg: 0,
+          timestampMs: 0,
+        },
+        route: ['CAR_CROSS'],
       },
       {
-        id: 'CAR_PARALLEL',
-        points: [PARALLEL_START, PARALLEL_END],
+        vehicle: {
+          id: 'CAR-002',
+          kind: 'CIVILIAN',
+          position: PARALLEL_START,
+          speedMps: 15,
+          headingDeg: 90,
+          timestampMs: 0,
+        },
+        route: ['CAR_PARALLEL'],
       },
     ]);
-
-    private simulation: SimulationState;
-    private initialSimulation: SimulationState;
-
-    private source: 'DEMO' | 'OSRM' = 'DEMO';
-    private routes: readonly ScenarioRoute[] = [];
-
-    private loading = false;
-
-    constructor(
-      private readonly state: DemoStateService,
-      private readonly gateway: DriversGateway,
-      private readonly osrm: OsrmClient,
-    ) {
-      this.simulation = this.createInitialSimulation();
-      this.initialSimulation = this.simulation;
-
-      this.state.initialize(this.simulation);
-    }
-
-    private createInitialSimulation(): SimulationState {
-      return createSimulation(this.network, 0, [
-        {
-          vehicle: {
-            id: 'AMB-001',
-            kind: 'EMERGENCY',
-            position: A,
-            speedMps: 15,
-            headingDeg: 90,
-            timestampMs: 0,
-          },
-          route: ['AMB_ROUTE'],
-        },
-        {
-          vehicle: {
-            id: 'CAR-001',
-            kind: 'CIVILIAN',
-            position: SOUTH,
-            speedMps: 20,
-            headingDeg: 0,
-            timestampMs: 0,
-          },
-          route: ['CAR_CROSS'],
-        },
-        {
-          vehicle: {
-            id: 'CAR-002',
-            kind: 'CIVILIAN',
-            position: PARALLEL_START,
-            speedMps: 15,
-            headingDeg: 90,
-            timestampMs: 0,
-          },
-          route: ['CAR_PARALLEL'],
-        },
-      ]);
-    }
-
-    getRouteMetadata() {
-      return {
-        source: this.source,
-        routes: this.routes,
-      };
-    }
-
-    /**
-     * Fetch and validate all routes before changing
-     * any active simulation state.
-     *
-     * Failure leaves the previous simulation and
-     * its active alerts untouched.
-     */
-    async loadRoadScenario(
-      vehicles: readonly RoadScenarioVehicleRequest[],
-    ) {
-      if (this.loading) {
-        throw new ConflictException(
-          'A road scenario is already loading',
-        );
-      }
-
-      this.loading = true;
-
-      let nextScenario: RoadScenario;
-
-      try {
-        const routed: RoutedVehicle[] = await Promise.all(
-          vehicles.map(
-            async (vehicle): Promise<RoutedVehicle> => {
-              const route =
-                await this.osrm.getDrivingRoute(
-                  vehicle.origin,
-                  vehicle.destination,
-                  vehicle.id,
-                );
-
-              return {
-                id: vehicle.id,
-                kind:
-                  vehicle.id === 'AMB-001'
-                    ? 'EMERGENCY'
-                    : 'CIVILIAN',
-                speedMps: vehicle.speedMps,
-                route,
-              };
-            },
-          ),
-        );
-
-        nextScenario = buildRoadScenario(routed);
-      } catch (error) {
-        const message =
-          error instanceof Error
-            ? error.message
-            : String(error);
-
-        this.logger.warn(
-          `Could not load OSRM scenario: ${message}`,
-        );
-
-        throw new BadGatewayException(
-          'Could not initialize the road scenario from routing data',
-        );
-      } finally {
-        this.loading = false;
-      }
-
-      // Commit the new scenario only after every
-      // route and simulation plan has been validated.
-      this.network = nextScenario.network;
-      this.initialSimulation = nextScenario.simulation;
-      this.simulation = nextScenario.simulation;
-
-      this.source = 'OSRM';
-      this.routes = nextScenario.routes;
-
-      this.state.initialize(this.simulation);
-
-      // Connected clients discard their old scene.
-      this.gateway.publishReset();
-
-      return {
-        ...this.getRouteMetadata(),
-        snapshot: this.state.getOperatorSnapshot(),
-      };
-    }
-
-    advance(deltaMs: number) {
-      if (
-        !Number.isSafeInteger(deltaMs) ||
-        deltaMs <= 0 ||
-        deltaMs > 60_000
-      ) {
-        throw new BadRequestException(
-          'deltaMs must be an integer between 1 and 60000',
-        );
-      }
-
-      const next = advanceSimulation(
-        this.network,
-        this.simulation,
-        deltaMs,
-      );
-
-      const emergency = next.vehicles.find(
-        (entry) =>
-          entry.vehicle.kind === 'EMERGENCY',
-      );
-
-      if (!emergency) {
-        throw new Error(
-          'Scenario has no emergency vehicle',
-        );
-      }
-
-      const civilians: VehicleJourney[] =
-        next.vehicles
-          .filter(
-            (entry) =>
-              entry.vehicle.kind === 'CIVILIAN',
-          )
-          .map((entry) => ({
-            network: this.network,
-            state: entry,
-          }));
-
-      const encounters = detectEncounters(
-        {
-          network: this.network,
-          state: emergency,
-        },
-        civilians,
-      );
-
-      const events = this.state.update(
-        next,
-        encounters,
-      );
-
-      this.simulation = next;
-
-      this.gateway.publishAlertEvents(events);
-      this.gateway.publishTick();
-
-      return {
-        timeMs: next.timeMs,
-        encounterCount: encounters.length,
-        events,
-        snapshot: this.state.getOperatorSnapshot(),
-      };
-    }
-
-    /**
-     * Rewind the currently loaded scenario.
-     *
-     * If OSRM routes are active, reset keeps those
-     * routes instead of returning to the old demo.
-     */
-    reset() {
-      this.simulation = this.initialSimulation;
-
-      this.state.initialize(this.simulation);
-      this.gateway.publishReset();
-
-      return this.state.getOperatorSnapshot();
-    }
   }
+
+  getRouteMetadata() {
+    const topologyStatus =
+      this.source === 'DEMO'
+        ? 'DEMO_GEOMETRIC'
+        : this.topologies.every((route) => route.nodes.length > 0)
+          ? 'OSM_NODE_EVIDENCE'
+          : 'UNAVAILABLE';
+
+    return {
+      source: this.source,
+      routes: this.routes,
+      topologyStatus,
+    };
+  }
+
+  /**
+   * Construct the entire OSRM scenario before replacing the running scene.
+   * A failed network request does not clear existing driver alerts.
+   */
+  async loadRoadScenario(
+    vehicles: readonly RoadScenarioVehicleRequest[],
+  ) {
+    if (this.loading) {
+      throw new ConflictException('A road scenario is already loading');
+    }
+
+    this.loading = true;
+    let nextScenario: RoadScenario;
+
+    try {
+      const routed: RoutedVehicle[] = await Promise.all(
+        vehicles.map(async (vehicle): Promise<RoutedVehicle> => {
+          const route = await this.osrm.getDrivingRoute(
+            vehicle.origin,
+            vehicle.destination,
+            vehicle.id,
+          );
+
+          return {
+            id: vehicle.id,
+            kind: vehicle.id === 'AMB-001' ? 'EMERGENCY' : 'CIVILIAN',
+            speedMps: vehicle.speedMps,
+            route,
+          };
+        }),
+      );
+
+      nextScenario = buildRoadScenario(routed);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.warn(`Could not load OSRM scenario: ${message}`);
+
+      throw new BadGatewayException(
+        'Could not initialize the road scenario from routing data',
+      );
+    } finally {
+      this.loading = false;
+    }
+
+    this.network = nextScenario.network;
+    this.initialSimulation = nextScenario.simulation;
+    this.simulation = nextScenario.simulation;
+    this.source = 'OSRM';
+    this.routes = nextScenario.routes;
+    this.topologies = nextScenario.topologies;
+
+    this.state.initialize(this.simulation);
+    this.gateway.publishReset();
+
+    return {
+      ...this.getRouteMetadata(),
+      snapshot: this.state.getOperatorSnapshot(),
+    };
+  }
+
+  advance(deltaMs: number) {
+    if (
+      !Number.isSafeInteger(deltaMs) ||
+      deltaMs <= 0 ||
+      deltaMs > 60_000
+    ) {
+      throw new BadRequestException(
+        'deltaMs must be an integer between 1 and 60000',
+      );
+    }
+
+    const next = advanceSimulation(
+      this.network,
+      this.simulation,
+      deltaMs,
+    );
+
+    const emergency = next.vehicles.find(
+      (entry) => entry.vehicle.kind === 'EMERGENCY',
+    );
+
+    if (!emergency) {
+      throw new Error('Scenario has no emergency vehicle');
+    }
+
+    const civilians: VehicleJourney[] = next.vehicles
+      .filter((entry) => entry.vehicle.kind === 'CIVILIAN')
+      .map((entry) => ({ network: this.network, state: entry }));
+
+    const geometricCandidates = detectEncounters(
+      { network: this.network, state: emergency },
+      civilians,
+    );
+
+    // The controlled demo retains its established behavior. For real OSRM
+    // roads, unsupported geometry crossings cannot create driver alerts.
+    const encounters = selectAlertableEncounters(
+      geometricCandidates,
+      this.source,
+      this.topologies,
+    );
+
+    const events = this.state.update(next, encounters);
+    this.simulation = next;
+
+    this.gateway.publishAlertEvents(events);
+    this.gateway.publishTick();
+
+    return {
+      timeMs: next.timeMs,
+      encounterCount: encounters.length,
+      suppressedCandidateCount: geometricCandidates.length - encounters.length,
+      events,
+      snapshot: this.state.getOperatorSnapshot(),
+    };
+  }
+
+  /** Rewind the active scenario, preserving its routing mode and topology. */
+  reset() {
+    this.simulation = this.initialSimulation;
+    this.state.initialize(this.simulation);
+    this.gateway.publishReset();
+    return this.state.getOperatorSnapshot();
+  }
+}
