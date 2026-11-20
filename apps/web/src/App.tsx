@@ -7,12 +7,15 @@ import {
 import { io, type Socket } from 'socket.io-client';
 import MapCanvas from './components/MapCanvas';
 import RoutePlanner from './components/RoutePlanner';
+import TrafficFleet from './components/TrafficFleet';
+import { featuredVehicles, getDriverAlert, type TrafficResponse } from './lib/traffic-view';
+import './traffic-fleet.css';
 import type { Position } from './lib/scene';
 import { chooseRoutePoint, EMPTY_ROUTE_DRAFT, nextUnselectedPoint, toRouteScenarioRequest, type RouteDraft, type RoutePointKey } from './lib/route-planner';
 import { api } from './lib/api';
 import { createSerialPlayback, type SerialPlaybackController } from './lib/serial-playback';
 import {
-  alertTitle, formatDistance, formatSimTime, getPrimaryDriverAlert,
+  alertTitle, formatDistance, formatSimTime,
   NEWARK_SCENARIO, vehicleLabel,
   type OperatorSnapshot, type RouteMetadata,
 } from './lib/scene';
@@ -52,6 +55,9 @@ export default function App() {
   const [playing, setPlaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [recenterKey, setRecenterKey] = useState(0);
+  // TRAFFIC_VIEW_10C: operator-only fleet monitoring; no real vehicle telemetry.
+  const [trafficMode, setTrafficMode] = useState(false);
+  const [selectedDriverId, setSelectedDriverId] = useState('CAR-001');
   // ROUTE_PLANNER_09B: all route selection state stays in the frontend.
   const [plannerOpen, setPlannerOpen] = useState(false);
   const [routeDraft, setRouteDraft] = useState<RouteDraft>(EMPTY_ROUTE_DRAFT);
@@ -79,14 +85,19 @@ export default function App() {
     let socket: Socket | null = null;
 
     async function connect() {
+      const sceneVersion = refreshVersion.current;
+      setConnection('connecting');
       try {
-        const [state, routes, session] = await Promise.all([
-          api.state(), api.routes(), api.session(),
+        const [state, routes, traffic, session] = await Promise.all([
+          api.state(), api.routes(), api.trafficStatus(), api.session(selectedDriverId),
         ]);
         if (cancelled) return;
-        setSnapshot(state);
-        setMetadata(routes);
-        setError(null);
+        if (!actionInProgress.current && sceneVersion === refreshVersion.current) {
+          setSnapshot(state);
+          setMetadata(routes);
+          setTrafficMode(traffic.active);
+          setError(null);
+        }
         setLoading(false);
 
         socket = io('/drivers', {
@@ -126,7 +137,7 @@ export default function App() {
       socket?.disconnect();
       socketRef.current = null;
     };
-  }, [refreshState]);
+  }, [refreshState, selectedDriverId]);
 
   const step = useCallback(async (deltaMs = 1000): Promise<boolean> => {
     // Do not submit overlapping commands while another simulation action runs.
@@ -208,9 +219,37 @@ export default function App() {
       const next = await api.loadScenario(NEWARK_SCENARIO);
       setSnapshot(next.snapshot);
       setMetadata({ source: next.source, routes: next.routes, topologyStatus: next.topologyStatus });
+      setTrafficMode(false);
+      setSelectedDriverId('CAR-001');
       setError(null);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Could not load Newark routes.');
+    } finally {
+      actionInProgress.current = false;
+      setBusy(false);
+    }
+  }, []);
+
+  // Same six OSRM routes + 25 seeded cars as 10A/10B; only the view is new.
+  const loadTraffic = useCallback(async () => {
+    if (actionInProgress.current) return;
+    setPlaying(false);
+    actionInProgress.current = true;
+    ++refreshVersion.current;
+    setBusy(true);
+    try {
+      const next: TrafficResponse = await api.loadTraffic(2026);
+      setSnapshot(next.snapshot);
+      setMetadata({ source: next.source, routes: next.routes, topologyStatus: next.topologyStatus });
+      setTrafficMode(true);
+      setSelectedDriverId('CAR-001');
+      setPlannerOpen(false);
+      setPickingPoint(null);
+      setRouteDraft(EMPTY_ROUTE_DRAFT);
+      setRecenterKey((value) => value + 1);
+      setError(null);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Could not load simulated traffic. Verify that the 10B API is running.');
     } finally {
       actionInProgress.current = false;
       setBusy(false);
@@ -244,6 +283,8 @@ export default function App() {
       // Only switch the visible scene after the API confirms successful initialization.
       setSnapshot(next.snapshot);
       setMetadata({ source: next.source, routes: next.routes, topologyStatus: next.topologyStatus });
+      setTrafficMode(false);
+      setSelectedDriverId('CAR-001');
       setPlannerOpen(false);
       setPickingPoint(null);
       setRouteDraft(EMPTY_ROUTE_DRAFT);
@@ -257,8 +298,10 @@ export default function App() {
     }
   }, [routeDraft]);
 
-  const activeAlert = getPrimaryDriverAlert(snapshot);
+  // Only the selected simulated driver is represented in the advisory.
+  const activeAlert = getDriverAlert(snapshot, selectedDriverId);
   const liveVehicles = snapshot?.vehicles ?? [];
+  const visibleVehicles = featuredVehicles(snapshot, selectedDriverId, trafficMode);
   const isRealRoads = metadata.source === 'OSRM';
   const primaryDistance = metadata.routes.find((route) => route.vehicleId === 'AMB-001')?.distanceMeters ?? 0;
   const finished = liveVehicles.length > 0 && liveVehicles.every((vehicle) => vehicle.finished);
@@ -320,6 +363,18 @@ export default function App() {
             >
               <span>Plan custom routes</span><span aria-hidden="true">↗</span>
             </button>
+            <button
+              className="traffic-scenario-trigger"
+              type="button"
+              data-active={trafficMode}
+              onClick={() => void loadTraffic()}
+              disabled={loading || busy}
+              aria-label="Load 25 simulated civilian vehicles"
+            >
+              <span>{busy ? 'Loading scenario…' : trafficMode ? 'Restart 25-car traffic' : 'Run 25-car traffic'}</span>
+              <span className="traffic-scenario-trigger__meta">1 ambulance · 25 cars</span>
+            </button>
+
           </div>
 
           <div className="section-heading section-heading--vehicles">
@@ -327,7 +382,7 @@ export default function App() {
             <span className="section-count">{liveVehicles.length}</span>
           </div>
           <div className="vehicle-list">
-            {liveVehicles.map((vehicle) => (
+            {visibleVehicles.map((vehicle) => (
               <div className="vehicle-entry" key={vehicle.id}>
                 <div className={`vehicle-icon ${vehicle.kind === 'EMERGENCY' ? 'vehicle-icon--emergency' : ''}`}>
                   {vehicle.kind === 'EMERGENCY'
@@ -346,6 +401,15 @@ export default function App() {
             ))}
             {loading && <div className="loading-line"><LoaderCircle className="spin" size={14} /> Loading vehicles...</div>}
           </div>
+
+          {trafficMode && (
+            <TrafficFleet
+              snapshot={snapshot}
+              selectedDriverId={selectedDriverId}
+              disabled={busy || loading}
+              onSelectDriver={(id) => setSelectedDriverId(id)}
+            />
+          )}
 
           <div className="sidebar-bottom">
             <div className={`advisory ${activeAlert ? 'advisory--active' : ''}`}>
@@ -369,7 +433,9 @@ export default function App() {
       </aside>
 
       <main className="map-stage">
-        <MapCanvas snapshot={snapshot} metadata={metadata} activeAlert={activeAlert} recenterKey={recenterKey} routeDraft={plannerOpen ? routeDraft : EMPTY_ROUTE_DRAFT} pickingPoint={plannerOpen ? pickingPoint : null} onPickLocation={handleMapSelection} />
+        <MapCanvas snapshot={snapshot} metadata={metadata} activeAlert={activeAlert} recenterKey={recenterKey} routeDraft={plannerOpen ? routeDraft : EMPTY_ROUTE_DRAFT} pickingPoint={plannerOpen ? pickingPoint : null} onPickLocation={handleMapSelection} trafficMode={trafficMode} selectedDriverId={selectedDriverId} onSelectDriver={(id) => {
+          if (!plannerOpen && !busy) setSelectedDriverId(id);
+        }} />
         {plannerOpen && (
           <RoutePlanner
             draft={routeDraft}

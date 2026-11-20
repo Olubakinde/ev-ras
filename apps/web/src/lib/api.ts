@@ -1,3 +1,4 @@
+import type { TrafficResponse, TrafficStatus } from './traffic-view';
 import type {
   AdvanceResponse,
   DriverSession,
@@ -42,7 +43,9 @@ function post<T>(path: string, value?: unknown): Promise<T> {
 export const api = {
   state: () => request<OperatorSnapshot>('/state'),
   routes: () => request<RouteMetadata>('/routes'),
-  session: () => post<DriverSession>('/sessions', { driverId: 'CAR-001' }),
+  session: (driverId = 'CAR-001') => post<DriverSession>('/sessions', { driverId }),
+  trafficStatus: () => request<TrafficStatus>('/traffic'),
+  loadTraffic: (seed = 2026) => post<TrafficResponse>('/traffic', { seed }),
   step: (deltaMs: number) => post<AdvanceResponse>('/advance', { deltaMs }),
   reset: () => post<OperatorSnapshot>('/reset'),
   loadScenario: (scenario: unknown) => post<ScenarioResponse>('/route-scenario', scenario),

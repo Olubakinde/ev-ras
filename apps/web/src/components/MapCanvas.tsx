@@ -5,6 +5,8 @@ import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
 import type { DriverAlert, OperatorSnapshot, Position, RouteMetadata, ScenarioRoute } from '../lib/scene';
 import { ROUTE_POINT_DETAILS, type RouteDraft, type RoutePointKey } from '../lib/route-planner';
 import { displayRoutes } from '../lib/scene';
+import { interpolateCoordinates, visibleTrafficRoutes } from '../lib/traffic-view';
+import '../traffic-fleet.css';
 
 // Vite's dependency optimizer rewrites MapLibre's import.meta.url, so the
 // library cannot find its tile worker and the map never draws.
@@ -17,6 +19,9 @@ interface Props {
   metadata: RouteMetadata;
   activeAlert: DriverAlert | null;
   recenterKey: number;
+  trafficMode: boolean;
+  selectedDriverId: string;
+  onSelectDriver: (id: string) => void;
   routeDraft: RouteDraft;
   pickingPoint: RoutePointKey | null;
   onPickLocation: (position: Position) => void;
@@ -72,11 +77,16 @@ function markerElement(id: string, emergency: boolean): HTMLElement {
   return root;
 }
 
-export default function MapCanvas({ snapshot, metadata, activeAlert, recenterKey, routeDraft, pickingPoint, onPickLocation }: Props) {
+export default function MapCanvas({ snapshot, metadata, activeAlert, recenterKey, routeDraft, pickingPoint, onPickLocation, trafficMode, selectedDriverId, onSelectDriver }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<Map<string, Marker>>(new Map());
   const conflictRef = useRef<Marker | null>(null);
+  // TRAFFIC_VIEW_10C: always invoke the latest selection callback from map pins.
+  const animationRef = useRef<number | null>(null);
+  const lastTickTimeRef = useRef<number | null>(null);
+  const selectDriverRef = useRef(onSelectDriver);
+  selectDriverRef.current = onSelectDriver;
   // ROUTE_PLANNER_09B: separate markers from live simulated vehicle markers.
   const routePickMarkersRef = useRef<Map<RoutePointKey, Marker>>(new Map());
   const [mapEpoch, setMapEpoch] = useState(0);
@@ -222,10 +232,23 @@ export default function MapCanvas({ snapshot, metadata, activeAlert, recenterKey
   }, [mapEpoch, routeDraft]);
 
   // Show vehicle pins as soon as the map object exists, even if tiles fail.
+  // Show vehicle pins as soon as the map object exists, even if tiles fail.
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapEpoch) return;
 
+    if (animationRef.current !== null) {
+      cancelAnimationFrame(animationRef.current);
+      animationRef.current = null;
+    }
+
+    const previousTick = lastTickTimeRef.current;
+    const currentTick = snapshot?.timeMs ?? null;
+    const animate = trafficMode && previousTick !== null && currentTick !== null &&
+      currentTick > previousTick && currentTick - previousTick <= 2000;
+    lastTickTimeRef.current = currentTick;
+
+    const moves: { marker: Marker; start: [number, number]; end: [number, number] }[] = [];
     const active = new Set<string>();
     for (const vehicle of snapshot?.vehicles ?? []) {
       active.add(vehicle.id);
@@ -237,9 +260,35 @@ export default function MapCanvas({ snapshot, metadata, activeAlert, recenterKey
         })
           .setLngLat([vehicle.position.longitude, vehicle.position.latitude])
           .addTo(map);
+        if (vehicle.kind === 'CIVILIAN') {
+          const el = marker.getElement();
+          el.setAttribute('role', 'button');
+          el.setAttribute('tabindex', '0');
+          el.addEventListener('click', (event) => {
+            event.stopPropagation();
+            selectDriverRef.current(vehicle.id);
+          });
+          el.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              selectDriverRef.current(vehicle.id);
+            }
+          });
+        }
         markersRef.current.set(vehicle.id, marker);
+      }
+
+      const el = marker.getElement();
+      el.classList.toggle('traffic-marker', trafficMode && vehicle.kind === 'CIVILIAN');
+      el.classList.toggle('traffic-marker--selected', trafficMode && vehicle.id === selectedDriverId);
+      el.title = vehicle.id === selectedDriverId ? `${vehicle.id} (monitored)` : vehicle.id;
+      const end: [number, number] = [vehicle.position.longitude, vehicle.position.latitude];
+      const previous = marker.getLngLat();
+      const start: [number, number] = [previous.lng, previous.lat];
+      if (animate && (start[0] !== end[0] || start[1] !== end[1])) {
+        moves.push({ marker, start, end });
       } else {
-        marker.setLngLat([vehicle.position.longitude, vehicle.position.latitude]);
+        marker.setLngLat(end);
       }
     }
 
@@ -249,7 +298,29 @@ export default function MapCanvas({ snapshot, metadata, activeAlert, recenterKey
         markersRef.current.delete(id);
       }
     }
-  }, [mapEpoch, snapshot]);
+
+    if (moves.length > 0) {
+      const startTime = performance.now();
+      const update = (now: number) => {
+        const progress = Math.min(1, (now - startTime) / 750);
+        for (const move of moves) {
+          move.marker.setLngLat(interpolateCoordinates(move.start, move.end, progress));
+        }
+        if (progress < 1) animationRef.current = requestAnimationFrame(update);
+        else animationRef.current = null;
+      };
+      animationRef.current = requestAnimationFrame(update);
+    }
+
+    return () => {
+      if (animationRef.current !== null) {
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = null;
+      }
+    };
+  }, [mapEpoch, snapshot, trafficMode, selectedDriverId]);
+
+
 
   // Add/update line geometry whenever a style (including the backup) loads.
   useEffect(() => {
@@ -273,6 +344,25 @@ export default function MapCanvas({ snapshot, metadata, activeAlert, recenterKey
       }
     }
   }, [styleEpoch, routes, recenterKey]);
+
+  // Render only emergency + monitored driver routes in traffic mode.
+  // Route selection updates without resetting map zoom or hiding other cars.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !styleEpoch) return;
+    const source = map.getSource('evras-routes') as GeoJSONSource | undefined;
+    source?.setData(lineFeatures(visibleTrafficRoutes(routes, selectedDriverId, trafficMode)));
+    if (map.getLayer('evras-route-lines')) {
+      map.setPaintProperty('evras-route-lines', 'line-color', [
+        'match', ['get', 'vehicleId'],
+        'AMB-001', '#cb594c',
+        selectedDriverId, '#273e3e',
+        '#9baba9',
+      ]);
+    }
+  }, [styleEpoch, routes, recenterKey, selectedDriverId, trafficMode]);
+
+
 
   useEffect(() => {
     const map = mapRef.current;
