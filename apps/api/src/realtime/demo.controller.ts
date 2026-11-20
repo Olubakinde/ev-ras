@@ -12,6 +12,10 @@ import {
   import { DemoSimulationService } from './demo-simulation.service.js';
   import { DemoStateService } from './demo-state.service.js';
 
+  import {
+    parseRoadScenarioRequest,
+  } from './road-scenario-request.js';
+
   function requireBody(
     value: unknown,
   ): Record<string, unknown> {
@@ -38,7 +42,8 @@ import {
 
     @Post('sessions')
     createDriverSession(
-      @Headers('x-demo-operator-key') operatorKey: string | undefined,
+      @Headers('x-demo-operator-key')
+      operatorKey: string | undefined,
       @Body() body: unknown,
     ) {
       this.access.assertOperatorAccess(operatorKey);
@@ -63,9 +68,26 @@ import {
       };
     }
 
+    @Post('route-scenario')
+    async loadRoadScenario(
+      @Headers('x-demo-operator-key')
+      operatorKey: string | undefined,
+      @Body() body: unknown,
+    ) {
+      this.access.assertOperatorAccess(operatorKey);
+
+      const vehicles =
+        parseRoadScenarioRequest(body);
+
+      return this.simulation.loadRoadScenario(
+        vehicles,
+      );
+    }
+
     @Post('advance')
     advance(
-      @Headers('x-demo-operator-key') operatorKey: string | undefined,
+      @Headers('x-demo-operator-key')
+      operatorKey: string | undefined,
       @Body() body: unknown,
     ) {
       this.access.assertOperatorAccess(operatorKey);
@@ -85,7 +107,8 @@ import {
 
     @Post('reset')
     reset(
-      @Headers('x-demo-operator-key') operatorKey: string | undefined,
+      @Headers('x-demo-operator-key')
+      operatorKey: string | undefined,
     ) {
       this.access.assertOperatorAccess(operatorKey);
 
@@ -94,10 +117,21 @@ import {
 
     @Get('state')
     getState(
-      @Headers('x-demo-operator-key') operatorKey: string | undefined,
+      @Headers('x-demo-operator-key')
+      operatorKey: string | undefined,
     ) {
       this.access.assertOperatorAccess(operatorKey);
 
       return this.state.getOperatorSnapshot();
+    }
+
+    @Get('routes')
+    getRoutes(
+      @Headers('x-demo-operator-key')
+      operatorKey: string | undefined,
+    ) {
+      this.access.assertOperatorAccess(operatorKey);
+
+      return this.simulation.getRouteMetadata();
     }
   }

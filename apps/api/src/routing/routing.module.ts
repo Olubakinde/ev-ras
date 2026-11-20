@@ -12,5 +12,6 @@ import { RoutingController } from './routing.controller.js';
       useFactory: () => new OsrmClient(),
     },
   ],
+  exports: [OsrmClient],
 })
 export class RoutingModule {}

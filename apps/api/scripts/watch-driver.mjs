@@ -16,11 +16,11 @@ if (!token) {
 }
 
 const socket = io(url, {
-  auth: {
-    token,
-  },
+  auth: { token },
   transports: ['websocket'],
-  reconnection: false,
+  reconnection: true,
+  reconnectionAttempts: 5,
+  reconnectionDelay: 1000,
 });
 
 socket.on('connect', () => {
@@ -28,9 +28,20 @@ socket.on('connect', () => {
 });
 
 socket.on('connect_error', (error) => {
-  console.error('Connection rejected:', error.message);
-  process.exitCode = 1;
-  socket.disconnect();
+  console.error(
+    'Connection error:',
+    error.message,
+  );
+
+  // Invalid sessions won't become valid by
+  // retrying the same token.
+  if (
+    error.message ===
+    'Unauthorized driver session'
+  ) {
+    socket.disconnect();
+    process.exitCode = 1;
+  }
 });
 
 socket.on('session:ready', (payload) => {
@@ -41,6 +52,7 @@ const events = [
   'simulation:snapshot',
   'simulation:tick',
   'simulation:reset',
+  'simulation:unavailable',
   'alert:created',
   'alert:updated',
   'alert:cleared',
