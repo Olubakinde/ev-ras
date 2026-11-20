@@ -1,0 +1,78 @@
+/* Milestone 09B: additive styles only. The existing EV-RAS visual identity is preserved. */
+.route-planner-trigger {
+  width: 100%;
+  margin-top: 8px;
+  padding: 9px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 550;
+  text-align: left;
+}
+.route-planner-trigger:hover,
+.route-planner-trigger[aria-expanded='true'] { background: var(--bg); }
+.route-planner-trigger:disabled { opacity: .48; }
+.route-planner {
+  position: absolute;
+  z-index: 8;
+  top: 100px;
+  left: 24px;
+  width: min(350px, calc(100% - 48px));
+  max-height: calc(100% - 230px);
+  overflow-y: auto;
+  padding: 19px;
+  background: var(--surface, #fff);
+  border: 1px solid var(--line, #e4e1da);
+  border-radius: 12px;
+  box-shadow: 0 16px 44px rgba(25, 32, 29, .12);
+  color: var(--ink, #1c1e1d);
+  font-family: var(--font, system-ui, sans-serif);
+}
+.route-planner__heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+.route-planner__heading h3 { margin: 3px 0 0; font-size: 20px; line-height: 1.25; font-weight: 610; letter-spacing: -.025em; }
+.route-planner__eyebrow { font-size: 12px; font-weight: 520; color: var(--ink-3); }
+.route-planner__icon { display: grid; place-items: center; background: transparent; border: 0; padding: 3px; border-radius: 6px; }
+.route-planner__icon:hover { background: var(--bg); }
+.route-planner__description { margin: 9px 0 15px; color: var(--ink-2); font-size: 12.5px; line-height: 1.55; }
+.route-planner__progress { display: flex; gap: 4px; margin-bottom: 18px; }
+.route-planner__progress span { height: 3px; background: var(--line-strong); border-radius: 2px; flex: 1; }
+.route-planner__progress .is-complete { background: var(--ok); }
+.route-planner__progress .is-current { background: var(--ink); }
+.route-planner__group { margin-top: 15px; }
+.route-planner__group-title { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 590; margin-bottom: 8px; }
+.route-planner__group-title small { margin-left: auto; color: var(--ink-3); font-size: 11px; font-weight: 450; }
+.route-planner__vehicle-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--civilian); }
+.route-planner__vehicle-dot--emergency { background: var(--emergency); }
+.route-planner__point {
+  display: flex; width: 100%; align-items: center; gap: 10px;
+  padding: 8px; text-align: left; border: 1px solid transparent;
+  border-radius: 8px; background: transparent;
+}
+.route-planner__point:hover { background: var(--bg); }
+.route-planner__point.is-selecting { background: var(--bg); border-color: var(--line-strong); }
+.route-planner__point > svg { color: var(--ink-3); flex: 0 0 auto; }
+.route-planner__marker { width: 26px; height: 26px; border-radius: 6px; display: grid; place-items: center; color: var(--civilian); background: var(--civilian-soft); font-size: 12px; font-weight: 700; flex: 0 0 auto; }
+.route-planner__marker--emergency { color: var(--emergency); background: var(--emergency-soft); }
+.route-planner__point-copy { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.route-planner__point-copy strong { font-size: 12.5px; font-weight: 560; }
+.route-planner__point-copy small { font-size: 11.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.route-planner__hint { color: var(--ink-2); min-height: 35px; margin: 14px 0 8px; font-size: 12px; line-height: 1.4; }
+.route-planner__actions { display: flex; align-items: center; gap: 8px; }
+.route-planner__clear { display: inline-flex; gap: 5px; align-items: center; height: 36px; padding: 0 11px; border-radius: 7px; background: transparent; border: 1px solid var(--line-strong); font-size: 12px; }
+.route-planner__generate { display: inline-flex; justify-content: center; align-items: center; gap: 8px; height: 36px; padding: 0 12px; flex: 1; background: var(--ink); color: #fff; border: 1px solid var(--ink); border-radius: 7px; font-size: 12px; font-weight: 580; }
+.route-planner__generate:not(:disabled):hover { background: #111312; }
+.route-planner__disclaimer { margin-top: 13px; color: var(--ink-3); font-size: 10.5px; line-height: 1.4; }
+.route-point-marker { display: grid; place-items: center; width: 28px; height: 28px; border: 2px solid #fff; border-radius: 50%; background: var(--civilian, #2c4246); color: #fff; font: 650 12px var(--font, system-ui); box-shadow: 0 2px 7px rgba(0,0,0,.24); }
+.route-point-marker--emergency { background: var(--emergency, #c4493a); }
+@media (max-width: 860px) {
+  .route-planner { position: absolute; top: auto; left: 12px; right: 12px; bottom: 94px; width: auto; max-height: min(64vh, 540px); padding: 14px; }
+}
+@media (max-height: 700px) and (min-width: 861px) {
+  .route-planner { top: 76px; max-height: calc(100% - 170px); }
+}

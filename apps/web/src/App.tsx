@@ -6,6 +6,9 @@ import {
 } from 'lucide-react';
 import { io, type Socket } from 'socket.io-client';
 import MapCanvas from './components/MapCanvas';
+import RoutePlanner from './components/RoutePlanner';
+import type { Position } from './lib/scene';
+import { chooseRoutePoint, EMPTY_ROUTE_DRAFT, nextUnselectedPoint, toRouteScenarioRequest, type RouteDraft, type RoutePointKey } from './lib/route-planner';
 import { api } from './lib/api';
 import {
   alertTitle, formatDistance, formatSimTime, getPrimaryDriverAlert,
@@ -48,6 +51,10 @@ export default function App() {
   const [playing, setPlaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [recenterKey, setRecenterKey] = useState(0);
+  // ROUTE_PLANNER_09B: all route selection state stays in the frontend.
+  const [plannerOpen, setPlannerOpen] = useState(false);
+  const [routeDraft, setRouteDraft] = useState<RouteDraft>(EMPTY_ROUTE_DRAFT);
+  const [pickingPoint, setPickingPoint] = useState<RoutePointKey | null>(null);
   const socketRef = useRef<Socket | null>(null);
   const actionInProgress = useRef(false);
 
@@ -171,6 +178,45 @@ export default function App() {
     }
   }, []);
 
+  // Route planning is explicit operator input. No background API requests on map clicks.
+  const handleMapSelection = useCallback((position: Position) => {
+    if (!plannerOpen || !pickingPoint || actionInProgress.current) return;
+    const next = chooseRoutePoint(routeDraft, pickingPoint, position);
+    setRouteDraft(next);
+    setPickingPoint(nextUnselectedPoint(next));
+  }, [plannerOpen, pickingPoint, routeDraft]);
+
+  const handlePlanRoutes = useCallback(async () => {
+    if (actionInProgress.current) return;
+    let request: ReturnType<typeof toRouteScenarioRequest>;
+    try {
+      request = toRouteScenarioRequest(routeDraft);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Select four route points.');
+      return;
+    }
+
+    setPlaying(false);
+    actionInProgress.current = true;
+    setBusy(true);
+    try {
+      const next = await api.loadScenario(request);
+      // Only switch the visible scene after the API confirms successful initialization.
+      setSnapshot(next.snapshot);
+      setMetadata({ source: next.source, routes: next.routes, topologyStatus: next.topologyStatus });
+      setPlannerOpen(false);
+      setPickingPoint(null);
+      setRouteDraft(EMPTY_ROUTE_DRAFT);
+      setRecenterKey((value) => value + 1);
+      setError(null);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Could not calculate the selected routes. Choose nearby drivable roads.');
+    } finally {
+      actionInProgress.current = false;
+      setBusy(false);
+    }
+  }, [routeDraft]);
+
   const activeAlert = getPrimaryDriverAlert(snapshot);
   const liveVehicles = snapshot?.vehicles ?? [];
   const isRealRoads = metadata.source === 'OSRM';
@@ -221,6 +267,19 @@ export default function App() {
               <span>{busy ? 'Working...' : isRealRoads ? 'Reload Newark routes' : 'Load real Newark routes'}</span>
               {busy ? <LoaderCircle size={ICON} className="spin" /> : <ArrowUpRight size={ICON} strokeWidth={STROKE} />}
             </button>
+            <button
+              className="route-planner-trigger"
+              type="button"
+              aria-expanded={plannerOpen}
+              onClick={() => {
+                setPlaying(false);
+                setPlannerOpen((current) => !current);
+                if (!pickingPoint) setPickingPoint(nextUnselectedPoint(routeDraft));
+              }}
+              disabled={loading || busy}
+            >
+              <span>Plan custom routes</span><span aria-hidden="true">↗</span>
+            </button>
           </div>
 
           <div className="section-heading section-heading--vehicles">
@@ -270,7 +329,18 @@ export default function App() {
       </aside>
 
       <main className="map-stage">
-        <MapCanvas snapshot={snapshot} metadata={metadata} activeAlert={activeAlert} recenterKey={recenterKey} />
+        <MapCanvas snapshot={snapshot} metadata={metadata} activeAlert={activeAlert} recenterKey={recenterKey} routeDraft={plannerOpen ? routeDraft : EMPTY_ROUTE_DRAFT} pickingPoint={plannerOpen ? pickingPoint : null} onPickLocation={handleMapSelection} />
+        {plannerOpen && (
+          <RoutePlanner
+            draft={routeDraft}
+            selecting={pickingPoint}
+            busy={busy}
+            onSelect={(key) => { setPlaying(false); setPickingPoint(key); }}
+            onClear={() => { setRouteDraft(EMPTY_ROUTE_DRAFT); setPickingPoint('ambulanceOrigin'); }}
+            onGenerate={() => void handlePlanRoutes()}
+            onClose={() => { setPlannerOpen(false); setPickingPoint(null); }}
+          />
+        )}
         <div className="map-topline">
           <div className="map-title-group">
             <span className="map-overline">EV-RAS</span>
