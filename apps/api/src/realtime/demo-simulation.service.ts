@@ -32,6 +32,14 @@ import {
 } from '../simulation/domain/road-network.js';
 
 import {
+  advanceMixedTraffic,
+  buildMixedTrafficScenario,
+  DEFAULT_TRAFFIC_SEED,
+  TRAFFIC_CAR_COUNT,
+  type MixedTrafficScenario,
+} from '../simulation/domain/mixed-traffic.js';
+
+import {
   advanceSimulation,
   createSimulation,
   type SimulationState,
@@ -42,6 +50,7 @@ import type {
 } from './road-scenario-request.js';
 
 import { DemoStateService } from './demo-state.service.js';
+import { NEWARK_TRAFFIC_ROUTES } from './traffic-presets.js';
 import { DriversGateway } from './drivers.gateway.js';
 
 const A = { latitude: 39.683, longitude: -75.751 };
@@ -68,6 +77,7 @@ export class DemoSimulationService {
   private routes: readonly ScenarioRoute[] = [];
   private topologies: readonly VehicleRoadTopology[] = [];
   private loading = false;
+  private traffic: MixedTrafficScenario | null = null;
 
   constructor(
     private readonly state: DemoStateService,
@@ -182,11 +192,74 @@ export class DemoSimulationService {
     this.source = 'OSRM';
     this.routes = nextScenario.routes;
     this.topologies = nextScenario.topologies;
+    this.traffic = null;
 
     this.state.initialize(this.simulation);
     this.gateway.publishReset();
 
     return {
+      ...this.getRouteMetadata(),
+      snapshot: this.state.getOperatorSnapshot(),
+    };
+  }
+
+  /** Metadata for the separately enabled 25-car demo traffic mode. */
+  getTrafficMetadata() {
+    return {
+      active: this.traffic !== null,
+      mode: this.traffic ? 'MIXED' : null,
+      seed: this.traffic?.seed ?? null,
+      civilianCount: this.traffic ? TRAFFIC_CAR_COUNT : 0,
+      routeTemplateCount: this.traffic ? 5 : 0,
+      encounterEvaluation: this.traffic ? 'DEFERRED_TO_10B' : null,
+    };
+  }
+
+  /**
+   * Load six real road routes once, then build 25 deterministically placed
+   * synthetic civilian vehicles. Any OSRM failure preserves the old scene.
+   *
+   * Traffic collision avoidance and mass warning selection belong to 10B.
+   */
+  async loadMixedTrafficScenario(seed = DEFAULT_TRAFFIC_SEED) {
+    if (this.loading) {
+      throw new ConflictException('A road scenario is already loading');
+    }
+    if (!Number.isSafeInteger(seed) || seed < 0 || seed > 4_294_967_295) {
+      throw new BadRequestException('seed must be a 32-bit unsigned integer');
+    }
+
+    this.loading = true;
+    let scenario: MixedTrafficScenario;
+    try {
+      // Sequential queries keep requests bounded on the public OSRM demo.
+      const routes = [];
+      for (const preset of NEWARK_TRAFFIC_ROUTES) {
+        routes.push(
+          await this.osrm.getDrivingRoute(preset.origin, preset.destination, preset.id),
+        );
+      }
+      scenario = buildMixedTrafficScenario(routes[0], routes.slice(1), seed);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.warn(`Could not load mixed traffic: ${message}`);
+      throw new BadGatewayException('Could not initialize the traffic scenario');
+    } finally {
+      this.loading = false;
+    }
+
+    this.network = scenario.network;
+    this.initialSimulation = scenario.initialSimulation;
+    this.simulation = scenario.initialSimulation;
+    this.routes = scenario.routes;
+    this.topologies = scenario.topologies;
+    this.source = 'OSRM';
+    this.traffic = scenario;
+    this.state.initialize(this.simulation);
+    this.gateway.publishReset();
+
+    return {
+      ...this.getTrafficMetadata(),
       ...this.getRouteMetadata(),
       snapshot: this.state.getOperatorSnapshot(),
     };
@@ -203,11 +276,14 @@ export class DemoSimulationService {
       );
     }
 
-    const next = advanceSimulation(
-      this.network,
-      this.simulation,
-      deltaMs,
-    );
+    const next = this.traffic
+      ? advanceMixedTraffic(
+          this.network,
+          this.simulation,
+          deltaMs,
+          this.traffic.profiles,
+        )
+      : advanceSimulation(this.network, this.simulation, deltaMs);
 
     const emergency = next.vehicles.find(
       (entry) => entry.vehicle.kind === 'EMERGENCY',
@@ -221,18 +297,18 @@ export class DemoSimulationService {
       .filter((entry) => entry.vehicle.kind === 'CIVILIAN')
       .map((entry) => ({ network: this.network, state: entry }));
 
-    const geometricCandidates = detectEncounters(
-      { network: this.network, state: emergency },
-      civilians,
-    );
+    // The traffic population is intentionally movement-only in 10A.
+    // We cannot claim reliable topology-aware warnings for cars whose
+    // route starts have been truncated until 10B validates their nodes.
+    const geometricCandidates = this.traffic
+      ? []
+      : detectEncounters({ network: this.network, state: emergency }, civilians);
 
     // The controlled demo retains its established behavior. For real OSRM
     // roads, unsupported geometry crossings cannot create driver alerts.
-    const encounters = selectAlertableEncounters(
-      geometricCandidates,
-      this.source,
-      this.topologies,
-    );
+    const encounters = this.traffic
+      ? []
+      : selectAlertableEncounters(geometricCandidates, this.source, this.topologies);
 
     const events = this.state.update(next, encounters);
     this.simulation = next;
@@ -244,6 +320,7 @@ export class DemoSimulationService {
       timeMs: next.timeMs,
       encounterCount: encounters.length,
       suppressedCandidateCount: geometricCandidates.length - encounters.length,
+      ...(this.traffic ? { encounterEvaluation: 'DEFERRED_TO_10B' } : {}),
       events,
       snapshot: this.state.getOperatorSnapshot(),
     };
