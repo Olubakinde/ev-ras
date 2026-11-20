@@ -10,6 +10,7 @@ import RoutePlanner from './components/RoutePlanner';
 import type { Position } from './lib/scene';
 import { chooseRoutePoint, EMPTY_ROUTE_DRAFT, nextUnselectedPoint, toRouteScenarioRequest, type RouteDraft, type RoutePointKey } from './lib/route-planner';
 import { api } from './lib/api';
+import { createSerialPlayback, type SerialPlaybackController } from './lib/serial-playback';
 import {
   alertTitle, formatDistance, formatSimTime, getPrimaryDriverAlert,
   NEWARK_SCENARIO, vehicleLabel,
@@ -57,12 +58,18 @@ export default function App() {
   const [pickingPoint, setPickingPoint] = useState<RoutePointKey | null>(null);
   const socketRef = useRef<Socket | null>(null);
   const actionInProgress = useRef(false);
+  const refreshVersion = useRef(0);
+  const playbackRef = useRef<SerialPlaybackController | null>(null);
 
+  // Avoid applying stale GET responses after a reset, route change, or later refresh.
   const refreshState = useCallback(async () => {
+    const version = ++refreshVersion.current;
     try {
       const next = await api.state();
+      if (version !== refreshVersion.current || actionInProgress.current) return;
       setSnapshot(next);
     } catch (caught) {
+      if (version !== refreshVersion.current || actionInProgress.current) return;
       setError(caught instanceof Error ? caught.message : 'Could not refresh simulation state.');
     }
   }, []);
@@ -121,33 +128,64 @@ export default function App() {
     };
   }, [refreshState]);
 
-  const step = useCallback(async (deltaMs = 1000) => {
-    if (actionInProgress.current) return;
+  const step = useCallback(async (deltaMs = 1000): Promise<boolean> => {
+    // Do not submit overlapping commands while another simulation action runs.
+    if (actionInProgress.current) return true;
     actionInProgress.current = true;
+    ++refreshVersion.current;
     setBusy(true);
     try {
       const next = await api.step(deltaMs);
+      ++refreshVersion.current;
       setSnapshot(next.snapshot);
       setError(null);
+      return !(next.snapshot.vehicles.length > 0 && next.snapshot.vehicles.every((vehicle) => vehicle.finished));
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Could not advance simulation.');
       setPlaying(false);
+      return false;
     } finally {
       actionInProgress.current = false;
       setBusy(false);
     }
   }, []);
 
+  // One request at a time. Slow responses never build up missed simulation ticks.
   useEffect(() => {
-    if (!playing) return;
-    const timer = window.setInterval(() => void step(1000), 1000);
-    return () => window.clearInterval(timer);
-  }, [playing, step]);
+    const controller = createSerialPlayback({
+      step: () => step(1000),
+      onStop: () => setPlaying(false),
+      onError: (caught) => {
+        setPlaying(false);
+        setError(caught instanceof Error ? caught.message : 'Playback failed.');
+      },
+    });
+    playbackRef.current = controller;
+    return () => {
+      controller.dispose();
+      playbackRef.current = null;
+    };
+  }, [step]);
+
+  useEffect(() => {
+    if (playing) playbackRef.current?.start();
+    else playbackRef.current?.pause();
+  }, [playing]);
+
+  // Returning to a backgrounded tab must not silently advance simulated traffic.
+  useEffect(() => {
+    const pauseWhenHidden = () => {
+      if (document.hidden) setPlaying(false);
+    };
+    document.addEventListener('visibilitychange', pauseWhenHidden);
+    return () => document.removeEventListener('visibilitychange', pauseWhenHidden);
+  }, []);
 
   const reset = useCallback(async () => {
     if (actionInProgress.current) return;
     setPlaying(false);
     actionInProgress.current = true;
+    ++refreshVersion.current;
     setBusy(true);
     try {
       setSnapshot(await api.reset());
@@ -164,6 +202,7 @@ export default function App() {
     if (actionInProgress.current) return;
     setPlaying(false);
     actionInProgress.current = true;
+    ++refreshVersion.current;
     setBusy(true);
     try {
       const next = await api.loadScenario(NEWARK_SCENARIO);
@@ -198,6 +237,7 @@ export default function App() {
 
     setPlaying(false);
     actionInProgress.current = true;
+    ++refreshVersion.current;
     setBusy(true);
     try {
       const next = await api.loadScenario(request);
