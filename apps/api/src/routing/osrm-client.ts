@@ -1,0 +1,192 @@
+
+import type { GeoPosition } from '../vehicles/domain/vehicle.js';
+import {
+  createRoadNetwork,
+  distanceMeters,
+  type RoadNetwork,
+  type RoadSegment,
+} from '../simulation/domain/road-network.js';
+
+export interface DrivingRoute {
+  readonly distanceMeters: number;
+  readonly durationSeconds: number;
+  readonly coordinates: readonly (readonly [number, number])[];
+  readonly roadNetwork: RoadNetwork;
+  readonly segmentIds: readonly string[];
+  readonly snappedStart: GeoPosition;
+  readonly snappedEnd: GeoPosition;
+}
+
+const MIN_SEGMENT_LENGTH_M = 0.05;
+
+function isRecord(
+  value: unknown,
+): value is Record<string, unknown> {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value)
+  );
+}
+
+function validatePosition(
+  position: GeoPosition,
+): void {
+  if (
+    !position ||
+    !Number.isFinite(position.latitude) ||
+    position.latitude < -90 ||
+    position.latitude > 90 ||
+    !Number.isFinite(position.longitude) ||
+    position.longitude < -180 ||
+    position.longitude > 180
+  ) {
+    throw new RangeError('Invalid geographic position');
+  }
+}
+
+function parseCoordinates(
+  raw: unknown,
+): GeoPosition[] {
+  if (!Array.isArray(raw) || raw.length < 2) {
+    throw new Error('OSRM returned invalid route geometry');
+  }
+
+  const points: GeoPosition[] = [];
+
+  for (const pair of raw) {
+    if (!Array.isArray(pair) || pair.length !== 2) {
+      throw new Error('Invalid OSRM coordinate pair');
+    }
+
+    const [longitude, latitude] = pair;
+
+    if (
+      typeof latitude !== 'number' ||
+      typeof longitude !== 'number'
+    ) {
+      throw new Error('Invalid OSRM coordinate values');
+    }
+
+    const position = { latitude, longitude };
+    validatePosition(position);
+
+    // Remove adjacent duplicate or near-duplicate points.
+    const previous = points[points.length - 1];
+
+    if (
+      !previous ||
+      distanceMeters(previous, position) >=
+        MIN_SEGMENT_LENGTH_M
+    ) {
+      points.push(position);
+    }
+  }
+
+  if (points.length < 2) {
+    throw new Error('OSRM route has no traversable geometry');
+  }
+
+  return points;
+}
+
+export class OsrmClient {
+  constructor(
+    private readonly request: typeof fetch = globalThis.fetch,
+    private readonly baseUrl: string =
+      process.env.OSRM_BASE_URL ??
+      'https://router.project-osrm.org',
+  ) {}
+
+  async getDrivingRoute(
+    origin: GeoPosition,
+    destination: GeoPosition,
+    routeId = 'route',
+  ): Promise<DrivingRoute> {
+    validatePosition(origin);
+    validatePosition(destination);
+
+    if (!routeId.trim()) {
+      throw new Error('Route ID cannot be empty');
+    }
+
+    const start = `${origin.longitude},${origin.latitude}`;
+    const end = `${destination.longitude},${destination.latitude}`;
+
+    const url = new URL(
+      `/route/v1/driving/${start};${end}`,
+      this.baseUrl,
+    );
+
+    url.searchParams.set('overview', 'full');
+    url.searchParams.set('geometries', 'geojson');
+    url.searchParams.set('steps', 'false');
+
+    const response = await this.request(url.toString(), {
+      signal: AbortSignal.timeout(8_000),
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `OSRM request failed with HTTP ${response.status}`,
+      );
+    }
+
+    const payload: unknown = await response.json();
+
+    if (
+      !isRecord(payload) ||
+      payload.code !== 'Ok' ||
+      !Array.isArray(payload.routes) ||
+      payload.routes.length === 0
+    ) {
+      throw new Error('OSRM could not calculate a route');
+    }
+
+    const route: unknown = payload.routes[0];
+
+    if (
+      !isRecord(route) ||
+      !Number.isFinite(route.distance) ||
+      !Number.isFinite(route.duration) ||
+      typeof route.distance !== 'number' ||
+      typeof route.duration !== 'number' ||
+      route.distance < 0 ||
+      route.duration < 0 ||
+      !isRecord(route.geometry) ||
+      route.geometry.type !== 'LineString'
+    ) {
+      throw new Error('OSRM returned invalid route data');
+    }
+
+    const points = parseCoordinates(
+      route.geometry.coordinates,
+    );
+
+    // Convert route geometry into connected directed segments
+    // understood by our existing simulation engine.
+    const segments: RoadSegment[] = [];
+
+    for (let i = 1; i < points.length; i++) {
+      segments.push({
+        id: `${routeId}:${i - 1}`,
+        points: [points[i - 1], points[i]],
+      });
+    }
+
+    const roadNetwork = createRoadNetwork(segments);
+
+    return {
+      distanceMeters: route.distance,
+      durationSeconds: route.duration,
+      coordinates: points.map(
+        (point) =>
+          [point.longitude, point.latitude] as const,
+      ),
+      roadNetwork,
+      segmentIds: segments.map((segment) => segment.id),
+      snappedStart: { ...points[0] },
+      snappedEnd: { ...points[points.length - 1] },
+    };
+  }
+}
