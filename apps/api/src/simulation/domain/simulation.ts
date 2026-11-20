@@ -3,7 +3,7 @@ import {
     createVehicle,
     type VehicleState,
   } from '../../vehicles/domain/vehicle.js';
-  
+
   import {
     distanceMeters,
     getRoad,
@@ -11,12 +11,12 @@ import {
     roadLengthMeters,
     type RoadNetwork,
   } from './road-network.js';
-  
+
   export interface VehiclePlan {
     readonly vehicle: VehicleState;
     readonly route: readonly string[];
   }
-  
+
   export interface SimulatedVehicle {
     readonly vehicle: VehicleState;
     readonly route: readonly string[];
@@ -24,14 +24,14 @@ import {
     readonly distanceOnSegmentM: number;
     readonly finished: boolean;
   }
-  
+
   export interface SimulationState {
     readonly timeMs: number;
     readonly vehicles: readonly SimulatedVehicle[];
   }
-  
+
   const CONNECT_TOLERANCE_M = 0.5;
-  
+
   /**
    * Creates a simulation with validated vehicle routes.
    *
@@ -51,44 +51,44 @@ import {
         'Simulation start time must be finite and nonnegative',
       );
     }
-  
+
     const ids = new Set<string>();
-  
+
     const vehicles = plans.map(({ vehicle, route }) => {
       const valid = createVehicle(vehicle);
-  
+
       if (valid.timestampMs !== startTimeMs) {
         throw new Error(
           `Vehicle ${valid.id} timestamp must match simulation time`,
         );
       }
-  
+
       if (ids.has(valid.id)) {
         throw new Error(`Duplicate vehicle: ${valid.id}`);
       }
-  
+
       ids.add(valid.id);
-  
+
       if (route.length === 0) {
         throw new Error(
           `Vehicle ${valid.id} needs a route`,
         );
       }
-  
+
       // Validate that every segment exists and connects
       // to the previous directed segment.
       for (let i = 0; i < route.length; i++) {
         const current = getRoad(network, route[i]);
-  
+
         if (i > 0) {
           const previous = getRoad(
             network,
             route[i - 1],
           );
-  
+
           const previousEnd =
             previous.points[previous.points.length - 1];
-  
+
           if (
             distanceMeters(
               previousEnd,
@@ -101,12 +101,12 @@ import {
           }
         }
       }
-  
+
       const start = getRoad(
         network,
         route[0],
       ).points[0];
-  
+
       if (
         distanceMeters(valid.position, start) >
         CONNECT_TOLERANCE_M
@@ -115,7 +115,7 @@ import {
           `Vehicle ${valid.id} must start at the beginning of its route`,
         );
       }
-  
+
       return {
         vehicle: {
           ...valid,
@@ -127,13 +127,13 @@ import {
         finished: false,
       } satisfies SimulatedVehicle;
     });
-  
+
     return {
       timeMs: startTimeMs,
       vehicles,
     };
   }
-  
+
   /**
    * Advances every vehicle using the same simulation clock.
    *
@@ -153,46 +153,46 @@ import {
         'Time step must be finite and nonnegative',
       );
     }
-  
+
     const nextTimeMs = simulation.timeMs + deltaMs;
-  
+
     if (!Number.isFinite(nextTimeMs)) {
       throw new RangeError('Simulation time overflow');
     }
-  
+
     return {
       timeMs: nextTimeMs,
-  
+
       vehicles: simulation.vehicles.map(
         (entry): SimulatedVehicle => {
           const { vehicle, route } = entry;
-  
+
           let index = entry.segmentIndex;
           let progress = entry.distanceOnSegmentM;
           let finished = entry.finished;
-  
+
           // Distance = speed × elapsed time.
           let remaining =
             vehicle.speedMps * (deltaMs / 1000);
-  
+
           if (!Number.isFinite(remaining)) {
             throw new RangeError(
               'Travel distance overflow',
             );
           }
-  
+
           // Advance through as many road segments as needed.
           while (remaining > 0 && !finished) {
             const road = getRoad(
               network,
               route[index],
             );
-  
+
             const available = Math.max(
               0,
               roadLengthMeters(road) - progress,
             );
-  
+
             if (remaining < available) {
               progress += remaining;
               remaining = 0;
@@ -200,23 +200,23 @@ import {
               remaining -= available;
               index += 1;
               progress = 0;
-  
+
               finished = index === route.length;
             }
           }
-  
+
           // Vehicle reached the end of its entire route.
           if (finished) {
             const last = getRoad(
               network,
               route[route.length - 1],
             );
-  
+
             const end = pointOnRoad(
               last,
               roadLengthMeters(last),
             );
-  
+
             return {
               vehicle: createVehicle({
                 ...vehicle,
@@ -230,7 +230,7 @@ import {
               finished: true,
             };
           }
-  
+
           // Sample the current road geometry if movement occurred.
           const sample =
             remaining === 0 &&
@@ -244,7 +244,7 @@ import {
                   position: { ...vehicle.position },
                   headingDeg: vehicle.headingDeg,
                 };
-  
+
           return {
             vehicle: createVehicle({
               ...vehicle,
@@ -260,4 +260,3 @@ import {
       ),
     };
   }
-  
