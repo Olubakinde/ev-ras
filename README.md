@@ -32,6 +32,3 @@ Run tests:
 
     pnpm test:api
 
-## Project Status
-
-Under active development for SLAY HACKS 2026.
