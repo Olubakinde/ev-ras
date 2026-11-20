@@ -1,7 +1,10 @@
 
 import {
+    BadGatewayException,
     BadRequestException,
+    ConflictException,
     Injectable,
+    Logger,
   } from '@nestjs/common';
 
   import {
@@ -9,8 +12,18 @@ import {
     type VehicleJourney,
   } from '../detection/domain/encounter-detector.js';
 
+  import { OsrmClient } from '../routing/osrm-client.js';
+
+  import {
+    buildRoadScenario,
+    type RoadScenario,
+    type RoutedVehicle,
+    type ScenarioRoute,
+  } from '../routing/route-scenario.js';
+
   import {
     createRoadNetwork,
+    type RoadNetwork,
   } from '../simulation/domain/road-network.js';
 
   import {
@@ -18,6 +31,10 @@ import {
     createSimulation,
     type SimulationState,
   } from '../simulation/domain/simulation.js';
+
+  import type {
+    RoadScenarioVehicleRequest,
+  } from './road-scenario-request.js';
 
   import { DemoStateService } from './demo-state.service.js';
   import { DriversGateway } from './drivers.gateway.js';
@@ -59,7 +76,11 @@ import {
 
   @Injectable()
   export class DemoSimulationService {
-    private readonly network = createRoadNetwork([
+    private readonly logger = new Logger(
+      DemoSimulationService.name,
+    );
+
+    private network: RoadNetwork = createRoadNetwork([
       {
         id: 'AMB_ROUTE',
         points: [A, B, C],
@@ -75,12 +96,21 @@ import {
     ]);
 
     private simulation: SimulationState;
+    private initialSimulation: SimulationState;
+
+    private source: 'DEMO' | 'OSRM' = 'DEMO';
+    private routes: readonly ScenarioRoute[] = [];
+
+    private loading = false;
 
     constructor(
       private readonly state: DemoStateService,
       private readonly gateway: DriversGateway,
+      private readonly osrm: OsrmClient,
     ) {
       this.simulation = this.createInitialSimulation();
+      this.initialSimulation = this.simulation;
+
       this.state.initialize(this.simulation);
     }
 
@@ -122,6 +152,95 @@ import {
       ]);
     }
 
+    getRouteMetadata() {
+      return {
+        source: this.source,
+        routes: this.routes,
+      };
+    }
+
+    /**
+     * Fetch and validate all routes before changing
+     * any active simulation state.
+     *
+     * Failure leaves the previous simulation and
+     * its active alerts untouched.
+     */
+    async loadRoadScenario(
+      vehicles: readonly RoadScenarioVehicleRequest[],
+    ) {
+      if (this.loading) {
+        throw new ConflictException(
+          'A road scenario is already loading',
+        );
+      }
+
+      this.loading = true;
+
+      let nextScenario: RoadScenario;
+
+      try {
+        const routed: RoutedVehicle[] = await Promise.all(
+          vehicles.map(
+            async (vehicle): Promise<RoutedVehicle> => {
+              const route =
+                await this.osrm.getDrivingRoute(
+                  vehicle.origin,
+                  vehicle.destination,
+                  vehicle.id,
+                );
+
+              return {
+                id: vehicle.id,
+                kind:
+                  vehicle.id === 'AMB-001'
+                    ? 'EMERGENCY'
+                    : 'CIVILIAN',
+                speedMps: vehicle.speedMps,
+                route,
+              };
+            },
+          ),
+        );
+
+        nextScenario = buildRoadScenario(routed);
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : String(error);
+
+        this.logger.warn(
+          `Could not load OSRM scenario: ${message}`,
+        );
+
+        throw new BadGatewayException(
+          'Could not initialize the road scenario from routing data',
+        );
+      } finally {
+        this.loading = false;
+      }
+
+      // Commit the new scenario only after every
+      // route and simulation plan has been validated.
+      this.network = nextScenario.network;
+      this.initialSimulation = nextScenario.simulation;
+      this.simulation = nextScenario.simulation;
+
+      this.source = 'OSRM';
+      this.routes = nextScenario.routes;
+
+      this.state.initialize(this.simulation);
+
+      // Connected clients discard their old scene.
+      this.gateway.publishReset();
+
+      return {
+        ...this.getRouteMetadata(),
+        snapshot: this.state.getOperatorSnapshot(),
+      };
+    }
+
     advance(deltaMs: number) {
       if (
         !Number.isSafeInteger(deltaMs) ||
@@ -146,7 +265,7 @@ import {
 
       if (!emergency) {
         throw new Error(
-          'Demo scenario has no emergency vehicle',
+          'Scenario has no emergency vehicle',
         );
       }
 
@@ -187,8 +306,14 @@ import {
       };
     }
 
+    /**
+     * Rewind the currently loaded scenario.
+     *
+     * If OSRM routes are active, reset keeps those
+     * routes instead of returning to the old demo.
+     */
     reset() {
-      this.simulation = this.createInitialSimulation();
+      this.simulation = this.initialSimulation;
 
       this.state.initialize(this.simulation);
       this.gateway.publishReset();

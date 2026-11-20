@@ -44,11 +44,16 @@ import {
 
     afterInit(server: Namespace): void {
       server.use((socket, next) => {
-        const token: unknown = socket.handshake.auth?.token;
-        const driverId = this.access.resolveDriver(token);
+        const token: unknown =
+          socket.handshake.auth?.token;
+
+        const driverId =
+          this.access.resolveDriver(token);
 
         if (!driverId) {
-          next(new Error('Unauthorized driver session'));
+          next(
+            new Error('Unauthorized driver session'),
+          );
           return;
         }
 
@@ -58,7 +63,8 @@ import {
     }
 
     handleConnection(client: Socket): void {
-      const driverId: unknown = client.data.driverId;
+      const driverId: unknown =
+        client.data.driverId;
 
       if (typeof driverId !== 'string') {
         client.disconnect(true);
@@ -67,13 +73,23 @@ import {
 
       void client.join(driverRoom(driverId));
 
-      client.emit('session:ready', { driverId });
+      client.emit('session:ready', {
+        driverId,
+      });
 
       const snapshot =
         this.state.snapshotForDriver(driverId);
 
       if (snapshot) {
-        client.emit('simulation:snapshot', snapshot);
+        client.emit(
+          'simulation:snapshot',
+          snapshot,
+        );
+      } else {
+        client.emit(
+          'simulation:unavailable',
+          { driverId },
+        );
       }
     }
 
@@ -111,7 +127,9 @@ import {
     }
 
     publishTick(): void {
-      for (const driverId of this.access.getDriverIds()) {
+      for (
+        const driverId of this.access.getDriverIds()
+      ) {
         const snapshot =
           this.state.snapshotForDriver(driverId);
 
@@ -124,14 +142,24 @@ import {
     }
 
     publishReset(): void {
-      for (const driverId of this.access.getDriverIds()) {
+      for (
+        const driverId of this.access.getDriverIds()
+      ) {
+        const room = driverRoom(driverId);
+
         const snapshot =
           this.state.snapshotForDriver(driverId);
 
         if (snapshot) {
           this.server
-            .to(driverRoom(driverId))
+            .to(room)
             .emit('simulation:reset', snapshot);
+        } else {
+          this.server
+            .to(room)
+            .emit('simulation:unavailable', {
+              driverId,
+            });
         }
       }
     }
