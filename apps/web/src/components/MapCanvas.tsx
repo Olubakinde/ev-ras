@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import type { GeoJSONSource, Marker } from 'maplibre-gl';
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
-import type { DriverAlert, OperatorSnapshot, RouteMetadata, ScenarioRoute } from '../lib/scene';
+import type { DriverAlert, OperatorSnapshot, Position, RouteMetadata, ScenarioRoute } from '../lib/scene';
+import { ROUTE_POINT_DETAILS, type RouteDraft, type RoutePointKey } from '../lib/route-planner';
 import { displayRoutes } from '../lib/scene';
 
 // Vite's dependency optimizer rewrites MapLibre's import.meta.url, so the
@@ -16,6 +17,9 @@ interface Props {
   metadata: RouteMetadata;
   activeAlert: DriverAlert | null;
   recenterKey: number;
+  routeDraft: RouteDraft;
+  pickingPoint: RoutePointKey | null;
+  onPickLocation: (position: Position) => void;
 }
 
 const PRIMARY_STYLE = 'https://tiles.openfreemap.org/styles/positron';
@@ -68,11 +72,13 @@ function markerElement(id: string, emergency: boolean): HTMLElement {
   return root;
 }
 
-export default function MapCanvas({ snapshot, metadata, activeAlert, recenterKey }: Props) {
+export default function MapCanvas({ snapshot, metadata, activeAlert, recenterKey, routeDraft, pickingPoint, onPickLocation }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<Map<string, Marker>>(new Map());
   const conflictRef = useRef<Marker | null>(null);
+  // ROUTE_PLANNER_09B: separate markers from live simulated vehicle markers.
+  const routePickMarkersRef = useRef<Map<RoutePointKey, Marker>>(new Map());
   const [mapEpoch, setMapEpoch] = useState(0);
   const [styleEpoch, setStyleEpoch] = useState(0);
   const [mapIssue, setMapIssue] = useState<string | null>(null);
@@ -157,10 +163,63 @@ export default function MapCanvas({ snapshot, metadata, activeAlert, recenterKey
       markersRef.current.clear();
       conflictRef.current?.remove();
       conflictRef.current = null;
+      routePickMarkersRef.current.forEach((marker) => marker.remove());
+      routePickMarkersRef.current.clear();
       mapRef.current = null;
       map.remove();
     };
   }, []);
+
+  // Picking adds a click listener without modifying MapLibre's rendering pipeline.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapEpoch) return;
+
+    map.getCanvas().style.cursor = pickingPoint ? 'crosshair' : '';
+    const selectPoint = (event: maplibregl.MapMouseEvent) => {
+      if (!pickingPoint) return;
+      onPickLocation({ latitude: event.lngLat.lat, longitude: event.lngLat.lng });
+    };
+    map.on('click', selectPoint);
+    return () => {
+      map.off('click', selectPoint);
+      map.getCanvas().style.cursor = '';
+    };
+  }, [mapEpoch, pickingPoint, onPickLocation]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapEpoch) return;
+
+    const selected = new Set<RoutePointKey>();
+    for (const item of ROUTE_POINT_DETAILS) {
+      const position = routeDraft[item.key];
+      if (!position) continue;
+      selected.add(item.key);
+      const existing = routePickMarkersRef.current.get(item.key);
+      if (existing) {
+        existing.setLngLat([position.longitude, position.latitude]);
+      } else {
+        const element = document.createElement('div');
+        element.className = item.vehicle === 'AMB-001'
+          ? 'route-point-marker route-point-marker--emergency'
+          : 'route-point-marker';
+        element.textContent = item.marker;
+        element.title = `${item.vehicle}: ${item.label}`;
+        element.setAttribute('aria-label', element.title);
+        const marker = new maplibregl.Marker({ element, anchor: 'center' })
+          .setLngLat([position.longitude, position.latitude])
+          .addTo(map);
+        routePickMarkersRef.current.set(item.key, marker);
+      }
+    }
+    for (const [key, marker] of routePickMarkersRef.current) {
+      if (!selected.has(key)) {
+        marker.remove();
+        routePickMarkersRef.current.delete(key);
+      }
+    }
+  }, [mapEpoch, routeDraft]);
 
   // Show vehicle pins as soon as the map object exists, even if tiles fail.
   useEffect(() => {
