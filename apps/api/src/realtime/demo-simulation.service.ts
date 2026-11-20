@@ -11,7 +11,7 @@ import {
   type VehicleJourney,
 } from '../detection/domain/encounter-detector.js';
 
-import { selectAlertableEncounters } from '../detection/domain/road-aware-encounters.js';
+import { createRoadEvidenceGate } from '../detection/domain/road-evidence-gate.js';
 
 import type {
   VehicleRoadTopology,
@@ -297,17 +297,22 @@ export class DemoSimulationService {
       .filter((entry) => entry.vehicle.kind === 'CIVILIAN')
       .map((entry) => ({ network: this.network, state: entry }));
 
-    // Every civilian is evaluated independently, including all 25 traffic cars.
-    // OSRM mode fails closed: geometric proximity is insufficient without
-    // compatible OSM node or shared-edge evidence at the conflict location.
-    const geometricCandidates = detectEncounters(
+    // Evaluate all valid candidates per driver, not only the geometric winner.
+    // OSRM mode fails closed *during* selection, so a closer unsupported
+    // crossing cannot hide a later, OSM-supported conflict on the same route.
+    // Keep the original DEMO mode geometric-only for backwards compatibility.
+    const geometricCandidateDrivers = new Set<string>();
+    const gate = this.source === 'OSRM'
+      ? createRoadEvidenceGate(this.topologies)
+      : null;
+    const encounters = detectEncounters(
       { network: this.network, state: emergency },
       civilians,
-    );
-    const encounters = selectAlertableEncounters(
-      geometricCandidates,
-      this.source,
-      this.topologies,
+      {},
+      (candidate) => {
+        geometricCandidateDrivers.add(candidate.civilianVehicleId);
+        return gate ? gate(candidate) : true;
+      },
     );
 
     const events = this.state.update(next, encounters);
@@ -319,7 +324,7 @@ export class DemoSimulationService {
     return {
       timeMs: next.timeMs,
       encounterCount: encounters.length,
-      suppressedCandidateCount: geometricCandidates.length - encounters.length,
+      suppressedCandidateCount: geometricCandidateDrivers.size - encounters.length,
       ...(this.traffic ? { encounterEvaluation: 'TOPOLOGY_FILTERED' } : {}),
       events,
       snapshot: this.state.getOperatorSnapshot(),
