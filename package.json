@@ -7,6 +7,10 @@
     "dev:api": "pnpm --filter api start:dev",
     "build:api": "pnpm --filter api build",
     "test:api": "pnpm --filter api test",
-    "lint:api": "pnpm --filter api lint"
+    "lint:api": "pnpm --filter api lint",
+    "dev:web": "pnpm --filter web dev",
+    "build:web": "pnpm --filter web build",
+    "test:web": "pnpm --filter web test",
+    "typecheck:web": "pnpm --filter web typecheck"
   }
 }
