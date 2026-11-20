@@ -1,0 +1,42 @@
+/* 10C extends the existing interface: no global typography or layout resets. */
+.traffic-scenario-trigger {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  width: 100%; margin-top: 8px; padding: 10px 12px;
+  border: 1px solid var(--line-strong, #d9dfd9); border-radius: 8px;
+  background: var(--surface, #fff); color: var(--ink, #252f2b);
+  font: inherit; font-size: 12.5px; font-weight: 620; text-align: left;
+}
+.traffic-scenario-trigger:hover:not(:disabled) { background: var(--bg, #f6f7f4); }
+.traffic-scenario-trigger:disabled { opacity: .55; cursor: not-allowed; }
+.traffic-scenario-trigger[data-active='true'] { border-color: #a4b9ae; background: #eef4ef; }
+.traffic-scenario-trigger__meta { font-size: 11px; color: var(--ink-3, #78827b); font-weight: 500; }
+.traffic-fleet { margin: 12px 0 17px; padding: 13px 12px 12px; border: 1px solid var(--line, #e2e7e1); border-radius: 10px; background: var(--surface, #fff); }
+.traffic-fleet__header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.traffic-fleet__header div { display: flex; flex-direction: column; gap: 3px; }
+.traffic-fleet__header strong { color: var(--ink, #26332d); font-size: 13px; font-weight: 650; }
+.traffic-fleet__header div span { color: var(--ink-3, #777f79); font-size: 10.5px; }
+.traffic-fleet__count { flex: 0 0 auto; font-size: 11px; font-variant-numeric: tabular-nums; font-weight: 650; color: var(--ink-2, #44564d); }
+.traffic-fleet__summary { display: flex; flex-wrap: wrap; gap: 8px; padding: 11px 0 9px; font-size: 10.5px; color: var(--ink-2, #606d65); }
+.traffic-fleet__summary span { display: flex; align-items: center; gap: 4px; }
+.traffic-fleet__dot { width: 6px; height: 6px; border-radius: 100%; display: inline-block; }
+.traffic-fleet__dot--moving { background: #588e76; }
+.traffic-fleet__warning { color: #b84b3d; font-weight: 650; }
+.traffic-fleet__list { max-height: 221px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; border-top: 1px solid var(--line, #e2e7e1); border-bottom: 1px solid var(--line, #e2e7e1); }
+.traffic-fleet__driver { width: 100%; display: flex; align-items: center; gap: 9px; padding: 8px 7px; border: 0; border-bottom: 1px solid var(--line, #e7ebe6); border-radius: 0; background: transparent; color: var(--ink-2, #3e4f45); font: inherit; font-size: 11px; text-align: left; }
+.traffic-fleet__driver:last-child { border-bottom: 0; }
+.traffic-fleet__driver:hover:not(:disabled) { background: var(--bg, #f5f7f4); }
+.traffic-fleet__driver--selected { background: #eef4f0; color: #1c4234; font-weight: 650; }
+.traffic-fleet__driver--selected:hover:not(:disabled) { background: #e8f0eb; }
+.traffic-fleet__driver:focus-visible, .traffic-scenario-trigger:focus-visible { outline: 2px solid #467e65; outline-offset: -2px; }
+.traffic-fleet__driver:disabled { cursor: wait; opacity: .6; }
+.traffic-fleet__driver-id { flex: 1; white-space: nowrap; }
+.traffic-fleet__driver-speed { white-space: nowrap; color: var(--ink-3, #758078); font-size: 10px; font-variant-numeric: tabular-nums; }
+.traffic-fleet__driver-alert { color: #ca594b; flex: 0 0 auto; }
+.traffic-fleet__notice { margin: 10px 1px 0; font-size: 10.5px; line-height: 1.45; color: var(--ink-3, #777f79); }
+/* Distinguish 25 background cars from the selected monitored car. */
+.vehicle-pin.traffic-marker { width: 17px; height: 17px; border: 2px solid #fff; background: #70837c; font-size: 0; opacity: .83; box-shadow: 0 1px 5px rgba(30,43,36,.14); cursor: pointer; }
+.vehicle-pin.traffic-marker span { display: none; }
+.vehicle-pin.traffic-marker--selected { width: 27px; height: 27px; border: 3px solid #fff; background: #284f42; opacity: 1; box-shadow: 0 0 0 3px rgba(47,101,79,.24), 0 2px 10px rgba(22,40,31,.26); z-index: 3; }
+.vehicle-pin.traffic-marker--selected span { display: block; font-size: 10px; }
+.vehicle-pin--emergency { z-index: 4; }
+@media (max-width: 790px) { .traffic-fleet__list { max-height: 160px; } }
