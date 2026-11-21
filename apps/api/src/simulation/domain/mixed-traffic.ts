@@ -135,7 +135,7 @@ function remainingRoute(
     remaining = 0;
   }
 
-  const routeIds = [...template.segmentIds.slice(index)];
+  const routeIds = template.segmentIds.slice(index);
   if (remaining < 0.5) {
     return {
       routeIds,

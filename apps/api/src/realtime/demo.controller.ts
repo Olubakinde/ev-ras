@@ -71,6 +71,26 @@ export class DemoController {
     return this.simulation.loadMixedTrafficScenario(seed);
   }
 
+  /** Change only synthetic vehicle offsets; reuse existing OSRM geometry. */
+  @Post('traffic/reseed')
+  reseedTrafficScenario(
+    @Headers('x-demo-operator-key') operatorKey: string | undefined,
+    @Body() body: unknown,
+  ) {
+    this.access.assertOperatorAccess(operatorKey);
+    const data = requireBody(body);
+    const seed = data.seed;
+    if (
+      typeof seed !== 'number' ||
+      !Number.isSafeInteger(seed) ||
+      seed < 0 ||
+      seed > 4_294_967_295
+    ) {
+      throw new BadRequestException('seed must be a 32-bit unsigned integer');
+    }
+    return this.simulation.reseedMixedTrafficScenario(seed);
+  }
+
   @Get('traffic')
   getTrafficScenario(
     @Headers('x-demo-operator-key') operatorKey: string | undefined,

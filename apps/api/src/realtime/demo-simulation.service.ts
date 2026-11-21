@@ -11,13 +11,13 @@ import {
   type VehicleJourney,
 } from '../detection/domain/encounter-detector.js';
 
-import { selectAlertableEncounters } from '../detection/domain/road-aware-encounters.js';
+import { createRoadEvidenceGate } from '../detection/domain/road-evidence-gate.js';
 
 import type {
   VehicleRoadTopology,
 } from '../detection/domain/road-topology.js';
 
-import { OsrmClient } from '../routing/osrm-client.js';
+import { OsrmClient, type DrivingRoute } from '../routing/osrm-client.js';
 
 import {
   buildRoadScenario,
@@ -78,6 +78,7 @@ export class DemoSimulationService {
   private topologies: readonly VehicleRoadTopology[] = [];
   private loading = false;
   private traffic: MixedTrafficScenario | null = null;
+  private trafficRoutes: readonly DrivingRoute[] | null = null;
 
   constructor(
     private readonly state: DemoStateService,
@@ -193,6 +194,7 @@ export class DemoSimulationService {
     this.routes = nextScenario.routes;
     this.topologies = nextScenario.topologies;
     this.traffic = null;
+    this.trafficRoutes = null;
 
     this.state.initialize(this.simulation);
     this.gateway.publishReset();
@@ -231,9 +233,9 @@ export class DemoSimulationService {
 
     this.loading = true;
     let scenario: MixedTrafficScenario;
+    const routes: DrivingRoute[] = [];
     try {
       // Sequential queries keep requests bounded on the public OSRM demo.
-      const routes = [];
       for (const preset of NEWARK_TRAFFIC_ROUTES) {
         routes.push(
           await this.osrm.getDrivingRoute(preset.origin, preset.destination, preset.id),
@@ -248,6 +250,45 @@ export class DemoSimulationService {
       this.loading = false;
     }
 
+    this.network = scenario.network;
+    this.initialSimulation = scenario.initialSimulation;
+    this.simulation = scenario.initialSimulation;
+    this.routes = scenario.routes;
+    this.topologies = scenario.topologies;
+    this.source = 'OSRM';
+    this.traffic = scenario;
+    this.trafficRoutes = routes;
+    this.state.initialize(this.simulation);
+    this.gateway.publishReset();
+
+    return {
+      ...this.getTrafficMetadata(),
+      ...this.getRouteMetadata(),
+      snapshot: this.state.getOperatorSnapshot(),
+    };
+  }
+
+  /**
+   * Regenerate synthetic traffic on the same six routed paths, without
+   * contacting OSRM again. This keeps geometry fixed during seed discovery.
+   * Operator-only via the controller; alerts and simulation clock reset.
+   */
+  reseedMixedTrafficScenario(seed = DEFAULT_TRAFFIC_SEED) {
+    if (this.loading) {
+      throw new ConflictException('A road scenario is already loading');
+    }
+    if (!Number.isSafeInteger(seed) || seed < 0 || seed > 4_294_967_295) {
+      throw new BadRequestException('seed must be a 32-bit unsigned integer');
+    }
+    if (!this.traffic || !this.trafficRoutes) {
+      throw new ConflictException('Initialize mixed traffic before reseeding');
+    }
+
+    // Build before mutating state: any invalid cached route leaves the scene
+    // unchanged. All car positions, speeds, and phase offsets derive from seed.
+    const scenario = buildMixedTrafficScenario(
+      this.trafficRoutes[0], this.trafficRoutes.slice(1), seed,
+    );
     this.network = scenario.network;
     this.initialSimulation = scenario.initialSimulation;
     this.simulation = scenario.initialSimulation;
@@ -297,17 +338,22 @@ export class DemoSimulationService {
       .filter((entry) => entry.vehicle.kind === 'CIVILIAN')
       .map((entry) => ({ network: this.network, state: entry }));
 
-    // Every civilian is evaluated independently, including all 25 traffic cars.
-    // OSRM mode fails closed: geometric proximity is insufficient without
-    // compatible OSM node or shared-edge evidence at the conflict location.
-    const geometricCandidates = detectEncounters(
+    // Evaluate all valid candidates per driver, not only the geometric winner.
+    // OSRM mode fails closed *during* selection, so a closer unsupported
+    // crossing cannot hide a later, OSM-supported conflict on the same route.
+    // Keep the original DEMO mode geometric-only for backwards compatibility.
+    const geometricCandidateDrivers = new Set<string>();
+    const gate = this.source === 'OSRM'
+      ? createRoadEvidenceGate(this.topologies)
+      : null;
+    const encounters = detectEncounters(
       { network: this.network, state: emergency },
       civilians,
-    );
-    const encounters = selectAlertableEncounters(
-      geometricCandidates,
-      this.source,
-      this.topologies,
+      {},
+      (candidate) => {
+        geometricCandidateDrivers.add(candidate.civilianVehicleId);
+        return gate ? gate(candidate) : true;
+      },
     );
 
     const events = this.state.update(next, encounters);
@@ -319,7 +365,7 @@ export class DemoSimulationService {
     return {
       timeMs: next.timeMs,
       encounterCount: encounters.length,
-      suppressedCandidateCount: geometricCandidates.length - encounters.length,
+      suppressedCandidateCount: geometricCandidateDrivers.size - encounters.length,
       ...(this.traffic ? { encounterEvaluation: 'TOPOLOGY_FILTERED' } : {}),
       events,
       snapshot: this.state.getOperatorSnapshot(),

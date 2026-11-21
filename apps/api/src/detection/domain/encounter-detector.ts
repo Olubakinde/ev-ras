@@ -33,6 +33,9 @@ export interface EncounterCandidate {
   readonly etaDifferenceSeconds: number | null;
 }
 
+/** A policy applied BEFORE the per-driver best-candidate selection. */
+export type CandidateEligibility = (candidate: EncounterCandidate) => boolean;
+
 export interface DetectionOptions {
   readonly horizonSeconds?: number;
   readonly arrivalWindowSeconds?: number;
@@ -179,6 +182,7 @@ function evaluateDriver(
   emergency: VehicleJourney,
   civilian: VehicleJourney,
   settings: Required<DetectionOptions>,
+  acceptCandidate: CandidateEligibility,
 ): EncounterCandidate | null {
   const ambulance = emergency.state.vehicle;
   const driver = civilian.state.vehicle;
@@ -221,7 +225,7 @@ function evaluateDriver(
       return null;
     }
 
-    return {
+    const result: EncounterCandidate = {
       emergencyVehicleId: ambulance.id,
       civilianVehicleId: driver.id,
       location: fromCoords(closest.geometry.coordinates),
@@ -230,6 +234,7 @@ function evaluateDriver(
       civilianEtaSeconds: null,
       etaDifferenceSeconds: null,
     };
+    return acceptCandidate(result) ? result : null;
   }
 
   const driverCoords = remainingCoordinates(civilian);
@@ -334,6 +339,9 @@ function evaluateDriver(
       etaDifferenceSeconds: difference,
     };
 
+    // Evidence and policy are evaluated before choosing the best ETA match.
+    if (!acceptCandidate(result)) continue;
+
     // Keep the strongest candidate for this driver:
     // closest predicted arrival times, then earliest ETA.
     if (
@@ -366,6 +374,7 @@ export function detectEncounters(
   emergency: VehicleJourney,
   civilians: readonly VehicleJourney[],
   options: DetectionOptions = {},
+  acceptCandidate: CandidateEligibility = () => true,
 ): EncounterCandidate[] {
   const settings = { ...DEFAULTS, ...options };
 
@@ -397,6 +406,7 @@ export function detectEncounters(
       emergency,
       civilian,
       settings,
+      acceptCandidate,
     );
 
     if (encounter) {
