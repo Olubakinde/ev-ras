@@ -1,0 +1,514 @@
+{
+  "version": 1,
+  "source": "OSRM",
+  "seed": 2028,
+  "steps": 120,
+  "geometryHash": "070294b891adde6d8b5f825114ee31831c96894bc1fea2ed385a000caf7aaec7",
+  "topologyStatus": "OSM_NODE_EVIDENCE",
+  "vehicleCount": 26,
+  "totals": {
+    "CREATED": 12,
+    "UPDATED": 55,
+    "CLEARED": 12
+  },
+  "suppressedCandidates": 2,
+  "supportedCandidates": 67,
+  "warnedDrivers": [
+    "CAR-002",
+    "CAR-008",
+    "CAR-013",
+    "CAR-016",
+    "CAR-018",
+    "CAR-021",
+    "CAR-023",
+    "CAR-025"
+  ],
+  "completedDrivers": [
+    "CAR-002",
+    "CAR-008",
+    "CAR-013",
+    "CAR-016",
+    "CAR-018",
+    "CAR-021",
+    "CAR-023",
+    "CAR-025"
+  ],
+  "activeAtEnd": [],
+  "timeline": [
+    {
+      "second": 1,
+      "type": "CREATED",
+      "driverId": "CAR-002",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 1,
+      "type": "CREATED",
+      "driverId": "CAR-008",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 1,
+      "type": "CREATED",
+      "driverId": "CAR-013",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 1,
+      "type": "CREATED",
+      "driverId": "CAR-021",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 1,
+      "type": "CREATED",
+      "driverId": "CAR-025",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 2,
+      "type": "UPDATED",
+      "driverId": "CAR-002",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 2,
+      "type": "UPDATED",
+      "driverId": "CAR-008",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 2,
+      "type": "UPDATED",
+      "driverId": "CAR-013",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 2,
+      "type": "UPDATED",
+      "driverId": "CAR-021",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 2,
+      "type": "UPDATED",
+      "driverId": "CAR-025",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 3,
+      "type": "UPDATED",
+      "driverId": "CAR-002",
+      "reason": "NEAR_PATH"
+    },
+    {
+      "second": 3,
+      "type": "UPDATED",
+      "driverId": "CAR-008",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 3,
+      "type": "UPDATED",
+      "driverId": "CAR-013",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 3,
+      "type": "UPDATED",
+      "driverId": "CAR-021",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 3,
+      "type": "UPDATED",
+      "driverId": "CAR-025",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 4,
+      "type": "CLEARED",
+      "driverId": "CAR-002",
+      "reason": "NEAR_PATH"
+    },
+    {
+      "second": 4,
+      "type": "UPDATED",
+      "driverId": "CAR-008",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 4,
+      "type": "CLEARED",
+      "driverId": "CAR-013",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 4,
+      "type": "CLEARED",
+      "driverId": "CAR-021",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 4,
+      "type": "UPDATED",
+      "driverId": "CAR-025",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 5,
+      "type": "UPDATED",
+      "driverId": "CAR-008",
+      "reason": "STATIONARY_ON_PATH"
+    },
+    {
+      "second": 5,
+      "type": "CREATED",
+      "driverId": "CAR-016",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 5,
+      "type": "UPDATED",
+      "driverId": "CAR-025",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 6,
+      "type": "CLEARED",
+      "driverId": "CAR-008",
+      "reason": "STATIONARY_ON_PATH"
+    },
+    {
+      "second": 6,
+      "type": "UPDATED",
+      "driverId": "CAR-016",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 6,
+      "type": "UPDATED",
+      "driverId": "CAR-025",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 7,
+      "type": "UPDATED",
+      "driverId": "CAR-016",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 7,
+      "type": "CLEARED",
+      "driverId": "CAR-025",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 8,
+      "type": "UPDATED",
+      "driverId": "CAR-016",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 8,
+      "type": "CREATED",
+      "driverId": "CAR-018",
+      "reason": "STATIONARY_ON_PATH"
+    },
+    {
+      "second": 9,
+      "type": "UPDATED",
+      "driverId": "CAR-016",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 9,
+      "type": "UPDATED",
+      "driverId": "CAR-018",
+      "reason": "STATIONARY_ON_PATH"
+    },
+    {
+      "second": 10,
+      "type": "UPDATED",
+      "driverId": "CAR-016",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 10,
+      "type": "UPDATED",
+      "driverId": "CAR-018",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 11,
+      "type": "UPDATED",
+      "driverId": "CAR-016",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 11,
+      "type": "UPDATED",
+      "driverId": "CAR-018",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 12,
+      "type": "UPDATED",
+      "driverId": "CAR-016",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 12,
+      "type": "UPDATED",
+      "driverId": "CAR-018",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 13,
+      "type": "UPDATED",
+      "driverId": "CAR-016",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 13,
+      "type": "CLEARED",
+      "driverId": "CAR-018",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 14,
+      "type": "UPDATED",
+      "driverId": "CAR-016",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 14,
+      "type": "CREATED",
+      "driverId": "CAR-023",
+      "reason": "STATIONARY_ON_PATH"
+    },
+    {
+      "second": 15,
+      "type": "CREATED",
+      "driverId": "CAR-013",
+      "reason": "STATIONARY_ON_PATH"
+    },
+    {
+      "second": 15,
+      "type": "UPDATED",
+      "driverId": "CAR-016",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 15,
+      "type": "CREATED",
+      "driverId": "CAR-021",
+      "reason": "STATIONARY_ON_PATH"
+    },
+    {
+      "second": 15,
+      "type": "UPDATED",
+      "driverId": "CAR-023",
+      "reason": "STATIONARY_ON_PATH"
+    },
+    {
+      "second": 16,
+      "type": "UPDATED",
+      "driverId": "CAR-013",
+      "reason": "STATIONARY_ON_PATH"
+    },
+    {
+      "second": 16,
+      "type": "CLEARED",
+      "driverId": "CAR-016",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 16,
+      "type": "UPDATED",
+      "driverId": "CAR-021",
+      "reason": "STATIONARY_ON_PATH"
+    },
+    {
+      "second": 16,
+      "type": "CLEARED",
+      "driverId": "CAR-023",
+      "reason": "STATIONARY_ON_PATH"
+    },
+    {
+      "second": 17,
+      "type": "UPDATED",
+      "driverId": "CAR-013",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 17,
+      "type": "UPDATED",
+      "driverId": "CAR-021",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 18,
+      "type": "UPDATED",
+      "driverId": "CAR-013",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 18,
+      "type": "UPDATED",
+      "driverId": "CAR-021",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 19,
+      "type": "UPDATED",
+      "driverId": "CAR-013",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 19,
+      "type": "UPDATED",
+      "driverId": "CAR-021",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 20,
+      "type": "UPDATED",
+      "driverId": "CAR-013",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 20,
+      "type": "UPDATED",
+      "driverId": "CAR-021",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 21,
+      "type": "UPDATED",
+      "driverId": "CAR-013",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 21,
+      "type": "UPDATED",
+      "driverId": "CAR-021",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 22,
+      "type": "UPDATED",
+      "driverId": "CAR-013",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 22,
+      "type": "UPDATED",
+      "driverId": "CAR-021",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 23,
+      "type": "CLEARED",
+      "driverId": "CAR-013",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 23,
+      "type": "UPDATED",
+      "driverId": "CAR-021",
+      "reason": "CROSSING"
+    },
+    {
+      "second": 24,
+      "type": "UPDATED",
+      "driverId": "CAR-021",
+      "reason": "CROSSING"
+    },
+    {
+      "second": 25,
+      "type": "CLEARED",
+      "driverId": "CAR-021",
+      "reason": "CROSSING"
+    },
+    {
+      "second": 27,
+      "type": "CREATED",
+      "driverId": "CAR-018",
+      "reason": "STATIONARY_ON_PATH"
+    },
+    {
+      "second": 28,
+      "type": "UPDATED",
+      "driverId": "CAR-018",
+      "reason": "STATIONARY_ON_PATH"
+    },
+    {
+      "second": 29,
+      "type": "UPDATED",
+      "driverId": "CAR-018",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 30,
+      "type": "UPDATED",
+      "driverId": "CAR-018",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 31,
+      "type": "UPDATED",
+      "driverId": "CAR-018",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 32,
+      "type": "CLEARED",
+      "driverId": "CAR-018",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 34,
+      "type": "CREATED",
+      "driverId": "CAR-013",
+      "reason": "STATIONARY_ON_PATH"
+    },
+    {
+      "second": 35,
+      "type": "UPDATED",
+      "driverId": "CAR-013",
+      "reason": "STATIONARY_ON_PATH"
+    },
+    {
+      "second": 36,
+      "type": "UPDATED",
+      "driverId": "CAR-013",
+      "reason": "SHARED_PATH"
+    },
+    {
+      "second": 37,
+      "type": "UPDATED",
+      "driverId": "CAR-013",
+      "reason": "CROSSING"
+    },
+    {
+      "second": 38,
+      "type": "UPDATED",
+      "driverId": "CAR-013",
+      "reason": "CROSSING"
+    },
+    {
+      "second": 39,
+      "type": "UPDATED",
+      "driverId": "CAR-013",
+      "reason": "CROSSING"
+    },
+    {
+      "second": 40,
+      "type": "CLEARED",
+      "driverId": "CAR-013",
+      "reason": "CROSSING"
+    }
+  ],
+  "validated": true
+}
