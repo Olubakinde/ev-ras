@@ -8,6 +8,9 @@ import { io, type Socket } from 'socket.io-client';
 import MapCanvas from './components/MapCanvas';
 import RoutePlanner from './components/RoutePlanner';
 import TrafficFleet from './components/TrafficFleet';
+import DemoEvents from './components/DemoEvents';
+import { appendDemoTick, emptyDemoStory, nextDriverToFocus } from './lib/demo-story';
+import './demo-events.css';
 import { featuredVehicles, getDriverAlert, type TrafficResponse } from './lib/traffic-view';
 import './traffic-fleet.css';
 import type { Position } from './lib/scene';
@@ -58,6 +61,10 @@ export default function App() {
   // TRAFFIC_VIEW_10C: operator-only fleet monitoring; no real vehicle telemetry.
   const [trafficMode, setTrafficMode] = useState(false);
   const [selectedDriverId, setSelectedDriverId] = useState('CAR-001');
+  // DEMO_STORY_12A: observed backend events; never generated from UI assumptions.
+  const [demoSeed, setDemoSeed] = useState<number | null>(null);
+  const [demoStory, setDemoStory] = useState(emptyDemoStory);
+  const [followAlerts, setFollowAlerts] = useState(true);
   // ROUTE_PLANNER_09B: all route selection state stays in the frontend.
   const [plannerOpen, setPlannerOpen] = useState(false);
   const [routeDraft, setRouteDraft] = useState<RouteDraft>(EMPTY_ROUTE_DRAFT);
@@ -66,6 +73,33 @@ export default function App() {
   const actionInProgress = useRef(false);
   const refreshVersion = useRef(0);
   const playbackRef = useRef<SerialPlaybackController | null>(null);
+  const demoStoryRef = useRef(demoStory);
+  const trafficModeRef = useRef(trafficMode);
+  const selectedDriverRef = useRef(selectedDriverId);
+  const followAlertsRef = useRef(followAlerts);
+  trafficModeRef.current = trafficMode;
+  selectedDriverRef.current = selectedDriverId;
+  followAlertsRef.current = followAlerts;
+
+  const resetDemoFeed = useCallback(() => {
+    const cleared = emptyDemoStory();
+    demoStoryRef.current = cleared;
+    setDemoStory(cleared);
+  }, []);
+
+  const chooseDriver = useCallback((id: string) => {
+    selectedDriverRef.current = id;
+    setSelectedDriverId(id);
+    followAlertsRef.current = false;
+    setFollowAlerts(false);
+  }, []);
+
+  const toggleFollowAlerts = useCallback(() => {
+    const next = !followAlertsRef.current;
+    followAlertsRef.current = next;
+    setFollowAlerts(next);
+  }, []);
+
 
   // Avoid applying stale GET responses after a reset, route change, or later refresh.
   const refreshState = useCallback(async () => {
@@ -79,6 +113,10 @@ export default function App() {
       setError(caught instanceof Error ? caught.message : 'Could not refresh simulation state.');
     }
   }, []);
+
+  useEffect(() => {
+    if (snapshot && snapshot.timeMs < demoStoryRef.current.lastTimeMs) resetDemoFeed();
+  }, [snapshot?.timeMs, resetDemoFeed]);
 
   useEffect(() => {
     let cancelled = false;
@@ -96,6 +134,7 @@ export default function App() {
           setSnapshot(state);
           setMetadata(routes);
           setTrafficMode(traffic.active);
+          setDemoSeed(traffic.seed);
           setError(null);
         }
         setLoading(false);
@@ -149,6 +188,19 @@ export default function App() {
       const next = await api.step(deltaMs);
       ++refreshVersion.current;
       setSnapshot(next.snapshot);
+      if (trafficModeRef.current) {
+        const previous = demoStoryRef.current;
+        const observed = appendDemoTick(previous, next);
+        demoStoryRef.current = observed;
+        setDemoStory(observed);
+        if (followAlertsRef.current) {
+          const focusId = nextDriverToFocus(selectedDriverRef.current, previous, observed, next.snapshot.alerts);
+          if (focusId) {
+            selectedDriverRef.current = focusId;
+            setSelectedDriverId(focusId);
+          }
+        }
+      }
       setError(null);
       return !(next.snapshot.vehicles.length > 0 && next.snapshot.vehicles.every((vehicle) => vehicle.finished));
     } catch (caught) {
@@ -200,6 +252,7 @@ export default function App() {
     setBusy(true);
     try {
       setSnapshot(await api.reset());
+      resetDemoFeed();
       setError(null);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Could not reset scenario.');
@@ -220,6 +273,8 @@ export default function App() {
       setSnapshot(next.snapshot);
       setMetadata({ source: next.source, routes: next.routes, topologyStatus: next.topologyStatus });
       setTrafficMode(false);
+      setDemoSeed(null);
+      resetDemoFeed();
       setSelectedDriverId('CAR-001');
       setError(null);
     } catch (caught) {
@@ -231,17 +286,21 @@ export default function App() {
   }, []);
 
   // Same six OSRM routes + 25 seeded cars as 10A/10B; only the view is new.
-  const loadTraffic = useCallback(async () => {
+  const loadTraffic = useCallback(async (seed = 2026) => {
     if (actionInProgress.current) return;
     setPlaying(false);
     actionInProgress.current = true;
     ++refreshVersion.current;
     setBusy(true);
     try {
-      const next: TrafficResponse = await api.loadTraffic(2026);
+      const next: TrafficResponse = await api.loadTraffic(seed);
       setSnapshot(next.snapshot);
       setMetadata({ source: next.source, routes: next.routes, topologyStatus: next.topologyStatus });
       setTrafficMode(true);
+      setDemoSeed(next.seed);
+      resetDemoFeed();
+      followAlertsRef.current = true;
+      setFollowAlerts(true);
       setSelectedDriverId('CAR-001');
       setPlannerOpen(false);
       setPickingPoint(null);
@@ -284,6 +343,8 @@ export default function App() {
       setSnapshot(next.snapshot);
       setMetadata({ source: next.source, routes: next.routes, topologyStatus: next.topologyStatus });
       setTrafficMode(false);
+      setDemoSeed(null);
+      resetDemoFeed();
       setSelectedDriverId('CAR-001');
       setPlannerOpen(false);
       setPickingPoint(null);
@@ -374,6 +435,15 @@ export default function App() {
               <span>{busy ? 'Loading scenario…' : trafficMode ? 'Restart 25-car traffic' : 'Run 25-car traffic'}</span>
               <span className="traffic-scenario-trigger__meta">1 ambulance · 25 cars</span>
             </button>
+            <button
+              className="demo-replay-trigger"
+              type="button"
+              onClick={() => void loadTraffic(2028)}
+              disabled={loading || busy}
+              title="Reload the seed used for the locally validated 11B replay. OSRM roads may have changed."
+            >
+              <span>Load demo replay</span><span>Seed 2028</span>
+            </button>
 
           </div>
 
@@ -407,7 +477,7 @@ export default function App() {
               snapshot={snapshot}
               selectedDriverId={selectedDriverId}
               disabled={busy || loading}
-              onSelectDriver={(id) => setSelectedDriverId(id)}
+              onSelectDriver={chooseDriver}
             />
           )}
 
@@ -434,8 +504,19 @@ export default function App() {
 
       <main className="map-stage">
         <MapCanvas snapshot={snapshot} metadata={metadata} activeAlert={activeAlert} recenterKey={recenterKey} routeDraft={plannerOpen ? routeDraft : EMPTY_ROUTE_DRAFT} pickingPoint={plannerOpen ? pickingPoint : null} onPickLocation={handleMapSelection} trafficMode={trafficMode} selectedDriverId={selectedDriverId} onSelectDriver={(id) => {
-          if (!plannerOpen && !busy) setSelectedDriverId(id);
+          if (!plannerOpen && !busy) chooseDriver(id);
         }} />
+        {trafficMode && !plannerOpen && (
+          <DemoEvents
+            snapshot={snapshot}
+            story={demoStory}
+            seed={demoSeed}
+            driverId={selectedDriverId}
+            followAlerts={followAlerts}
+            onToggleFollow={toggleFollowAlerts}
+            onSelectDriver={chooseDriver}
+          />
+        )}
         {plannerOpen && (
           <RoutePlanner
             draft={routeDraft}
