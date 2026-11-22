@@ -1,0 +1,1170 @@
+{
+  "evaluationKind": "INDEPENDENT_SIMULATED_CROSSING_TIMES",
+  "simulation": {
+    "detectorStepMs": 1000,
+    "independentArrivalStepMs": 100,
+    "durationSeconds": 80,
+    "conflictWindowSeconds": 5,
+    "lateThresholdSeconds": 10
+  },
+  "metrics": {
+    "samples": 12,
+    "truePositive": 7,
+    "falsePositive": 1,
+    "trueNegative": 3,
+    "falseNegative": 1,
+    "precision": 0.875,
+    "recall": 0.875,
+    "specificity": 0.75,
+    "f1": 0.875,
+    "balancedAccuracy": 0.8125
+  },
+  "actualPositiveCases": 8,
+  "lateTruePositiveWarnings": 1,
+  "warningLeadSeconds": {
+    "count": 7,
+    "min": 3.1377322486925014,
+    "mean": 18.926454975089907,
+    "median": 17.114903173790726,
+    "p90": 34.89214987141076,
+    "max": 44.34470950224076
+  },
+  "absoluteEtaPredictionErrorSeconds": {
+    "count": 7,
+    "min": 0,
+    "mean": 1.6393628974397847,
+    "median": 8.881784197001252e-15,
+    "p90": 4.590216113670551,
+    "max": 11.475540277066685
+  },
+  "cases": [
+    {
+      "id": "early-synchronized-crossing",
+      "explanation": "Two vehicles approach a connected junction at similar arrival times, with about 17 seconds of travel remaining.",
+      "physicalConnectivity": "AT_GRADE",
+      "evidence": "COMPLETE",
+      "actualAmbulanceCrossingSeconds": 17.114903173790726,
+      "actualCivilianCrossingSeconds": 17.10693542056438,
+      "actualArrivalDifferenceSeconds": 0.00796775322634602,
+      "independentlyExpectedEncounter": true,
+      "anyWarningIssued": true,
+      "outcome": "TP",
+      "warningCount": 1,
+      "clearedCount": 1,
+      "firstWarningAtSeconds": 0,
+      "warningLeadSeconds": 17.114903173790726,
+      "lateWarning": false,
+      "predictedAmbulanceEtaAtCreationSeconds": 17.114903173790726,
+      "etaPredictionErrorSeconds": 0,
+      "events": [
+        {
+          "type": "CREATED",
+          "timeSeconds": 0,
+          "emergencyEtaSeconds": 17.114903173790726,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 1,
+          "emergencyEtaSeconds": 16.11490317384154,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 2,
+          "emergencyEtaSeconds": 15.114903173958048,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 3,
+          "emergencyEtaSeconds": 14.11490317397907,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 4,
+          "emergencyEtaSeconds": 13.11490317406769,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 5,
+          "emergencyEtaSeconds": 12.114903174062736,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 6,
+          "emergencyEtaSeconds": 11.114903174127289,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 7,
+          "emergencyEtaSeconds": 10.114903174100165,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 8,
+          "emergencyEtaSeconds": 9.114903174063395,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 9,
+          "emergencyEtaSeconds": 8.114903174098997,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 10,
+          "emergencyEtaSeconds": 7.114903174045789,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 11,
+          "emergencyEtaSeconds": 6.114903174066863,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 12,
+          "emergencyEtaSeconds": 5.114903174001031,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 13,
+          "emergencyEtaSeconds": 4.114903174011393,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 14,
+          "emergencyEtaSeconds": 3.114903173936755,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 15,
+          "emergencyEtaSeconds": 2.114903173859147,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 16,
+          "emergencyEtaSeconds": 1.1149031738605928,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 17,
+          "emergencyEtaSeconds": 0.11490317377990279,
+          "reason": "SHARED_PATH"
+        },
+        {
+          "type": "CLEARED",
+          "timeSeconds": 18,
+          "emergencyEtaSeconds": 0.11490317377990279,
+          "reason": "SHARED_PATH"
+        }
+      ]
+    },
+    {
+      "id": "late-synchronized-crossing",
+      "explanation": "Same connected junction, but both vehicles begin only a few seconds away; an alert may arrive too late for the chosen ten-second benchmark.",
+      "physicalConnectivity": "AT_GRADE",
+      "evidence": "COMPLETE",
+      "actualAmbulanceCrossingSeconds": 3.1377322486925014,
+      "actualCivilianCrossingSeconds": 3.1273616315731685,
+      "actualArrivalDifferenceSeconds": 0.010370617119332959,
+      "independentlyExpectedEncounter": true,
+      "anyWarningIssued": true,
+      "outcome": "TP",
+      "warningCount": 1,
+      "clearedCount": 1,
+      "firstWarningAtSeconds": 0,
+      "warningLeadSeconds": 3.1377322486925014,
+      "lateWarning": true,
+      "predictedAmbulanceEtaAtCreationSeconds": 3.1377322486925014,
+      "etaPredictionErrorSeconds": 0,
+      "events": [
+        {
+          "type": "CREATED",
+          "timeSeconds": 0,
+          "emergencyEtaSeconds": 3.1377322486925014,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 1,
+          "emergencyEtaSeconds": 2.1377322486960226,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 2,
+          "emergencyEtaSeconds": 1.1377322486975034,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 3,
+          "emergencyEtaSeconds": 0.1377322486978996,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "CLEARED",
+          "timeSeconds": 4,
+          "emergencyEtaSeconds": 0.1377322486978996,
+          "reason": "CROSSING"
+        }
+      ]
+    },
+    {
+      "id": "moderate-speed-crossing",
+      "explanation": "Two connected approaches at different speeds arrive within the manually selected five-second temporal conflict window.",
+      "physicalConnectivity": "AT_GRADE",
+      "evidence": "COMPLETE",
+      "actualAmbulanceCrossingSeconds": 10.067590102466507,
+      "actualCivilianCrossingSeconds": 10.424538771894126,
+      "actualArrivalDifferenceSeconds": 0.35694866942761827,
+      "independentlyExpectedEncounter": true,
+      "anyWarningIssued": true,
+      "outcome": "TP",
+      "warningCount": 1,
+      "clearedCount": 1,
+      "firstWarningAtSeconds": 0,
+      "warningLeadSeconds": 10.067590102466507,
+      "lateWarning": false,
+      "predictedAmbulanceEtaAtCreationSeconds": 10.067590102466498,
+      "etaPredictionErrorSeconds": -8.881784197001252e-15,
+      "events": [
+        {
+          "type": "CREATED",
+          "timeSeconds": 0,
+          "emergencyEtaSeconds": 10.067590102466498,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 1,
+          "emergencyEtaSeconds": 9.067590102475108,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 2,
+          "emergencyEtaSeconds": 8.067590102544141,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 3,
+          "emergencyEtaSeconds": 7.067590102531753,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 4,
+          "emergencyEtaSeconds": 6.067590102582239,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 5,
+          "emergencyEtaSeconds": 5.067590102553755,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 6,
+          "emergencyEtaSeconds": 4.067590102519061,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 7,
+          "emergencyEtaSeconds": 3.0675901025509185,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 8,
+          "emergencyEtaSeconds": 2.0675901025074808,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 9,
+          "emergencyEtaSeconds": 1.0675901024615098,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 10,
+          "emergencyEtaSeconds": 0.06759010248576558,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "CLEARED",
+          "timeSeconds": 11,
+          "emergencyEtaSeconds": 0.06759010248576558,
+          "reason": "CROSSING"
+        }
+      ]
+    },
+    {
+      "id": "overpass-no-road-connection",
+      "explanation": "Both polylines intersect in the map plane, but the crossing is physically grade-separated, with different node identities.",
+      "physicalConnectivity": "GRADE_SEPARATED",
+      "evidence": "COMPLETE",
+      "actualAmbulanceCrossingSeconds": 17.114903173790726,
+      "actualCivilianCrossingSeconds": 17.10693542056438,
+      "actualArrivalDifferenceSeconds": 0.00796775322634602,
+      "independentlyExpectedEncounter": false,
+      "anyWarningIssued": false,
+      "outcome": "TN",
+      "warningCount": 0,
+      "clearedCount": 0,
+      "firstWarningAtSeconds": null,
+      "warningLeadSeconds": null,
+      "lateWarning": null,
+      "predictedAmbulanceEtaAtCreationSeconds": null,
+      "etaPredictionErrorSeconds": null,
+      "events": []
+    },
+    {
+      "id": "at-grade-missing-node-evidence",
+      "explanation": "A genuine modeled at-grade conflict is deliberately missing the civilian OSM node annotation and should expose a fail-closed miss.",
+      "physicalConnectivity": "AT_GRADE",
+      "evidence": "MISSING_ANNOTATION",
+      "actualAmbulanceCrossingSeconds": 17.114903173790726,
+      "actualCivilianCrossingSeconds": 17.10693542056438,
+      "actualArrivalDifferenceSeconds": 0.00796775322634602,
+      "independentlyExpectedEncounter": true,
+      "anyWarningIssued": false,
+      "outcome": "FN",
+      "warningCount": 0,
+      "clearedCount": 0,
+      "firstWarningAtSeconds": null,
+      "warningLeadSeconds": null,
+      "lateWarning": null,
+      "predictedAmbulanceEtaAtCreationSeconds": null,
+      "etaPredictionErrorSeconds": null,
+      "events": []
+    },
+    {
+      "id": "civilian-arrives-too-late",
+      "explanation": "Roads connect but vehicle arrival times differ by far more than five seconds; the physical policy label is negative.",
+      "physicalConnectivity": "AT_GRADE",
+      "evidence": "COMPLETE",
+      "actualAmbulanceCrossingSeconds": 9.508279541218354,
+      "actualCivilianCrossingSeconds": 44.47803209346752,
+      "actualArrivalDifferenceSeconds": 34.96975255224916,
+      "independentlyExpectedEncounter": false,
+      "anyWarningIssued": false,
+      "outcome": "TN",
+      "warningCount": 0,
+      "clearedCount": 0,
+      "firstWarningAtSeconds": null,
+      "warningLeadSeconds": null,
+      "lateWarning": null,
+      "predictedAmbulanceEtaAtCreationSeconds": null,
+      "etaPredictionErrorSeconds": null,
+      "events": []
+    },
+    {
+      "id": "civilian-brakes-after-warning",
+      "explanation": "Civilian slows after five seconds, so a warning based on initial constant speed can become a false alert for the final trajectory.",
+      "physicalConnectivity": "AT_GRADE",
+      "evidence": "COMPLETE",
+      "actualAmbulanceCrossingSeconds": 17.114903173790726,
+      "actualCivilianCrossingSeconds": 31.231693411223187,
+      "actualArrivalDifferenceSeconds": 14.116790237432461,
+      "independentlyExpectedEncounter": false,
+      "anyWarningIssued": true,
+      "outcome": "FP",
+      "warningCount": 1,
+      "clearedCount": 1,
+      "firstWarningAtSeconds": 0,
+      "warningLeadSeconds": 17.114903173790726,
+      "lateWarning": null,
+      "predictedAmbulanceEtaAtCreationSeconds": 17.114903173790726,
+      "etaPredictionErrorSeconds": 0,
+      "events": [
+        {
+          "type": "CREATED",
+          "timeSeconds": 0,
+          "emergencyEtaSeconds": 17.114903173790726,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 1,
+          "emergencyEtaSeconds": 16.11490317384154,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 2,
+          "emergencyEtaSeconds": 15.114903173958048,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 3,
+          "emergencyEtaSeconds": 14.11490317397907,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 4,
+          "emergencyEtaSeconds": 13.11490317406769,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "CLEARED",
+          "timeSeconds": 5,
+          "emergencyEtaSeconds": 13.11490317406769,
+          "reason": "CROSSING"
+        }
+      ]
+    },
+    {
+      "id": "civilian-accelerates-into-conflict",
+      "explanation": "Civilian initially appears too slow to conflict but accelerates after five seconds; the detector must re-evaluate over time.",
+      "physicalConnectivity": "AT_GRADE",
+      "evidence": "COMPLETE",
+      "actualAmbulanceCrossingSeconds": 17.114903173790726,
+      "actualCivilianCrossingSeconds": 15.125797919333532,
+      "actualArrivalDifferenceSeconds": 1.9891052544571934,
+      "independentlyExpectedEncounter": true,
+      "anyWarningIssued": true,
+      "outcome": "TP",
+      "warningCount": 1,
+      "clearedCount": 1,
+      "firstWarningAtSeconds": 5,
+      "warningLeadSeconds": 12.114903173790726,
+      "lateWarning": false,
+      "predictedAmbulanceEtaAtCreationSeconds": 12.114903174062736,
+      "etaPredictionErrorSeconds": 2.7200997010368155e-10,
+      "events": [
+        {
+          "type": "CREATED",
+          "timeSeconds": 5,
+          "emergencyEtaSeconds": 12.114903174062736,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 6,
+          "emergencyEtaSeconds": 11.114903174127289,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 7,
+          "emergencyEtaSeconds": 10.114903174100165,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 8,
+          "emergencyEtaSeconds": 9.114903174063395,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 9,
+          "emergencyEtaSeconds": 8.114903174098997,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 10,
+          "emergencyEtaSeconds": 7.114903174045789,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 11,
+          "emergencyEtaSeconds": 6.114903174066863,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 12,
+          "emergencyEtaSeconds": 5.114903174001031,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 13,
+          "emergencyEtaSeconds": 4.114903174011393,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 14,
+          "emergencyEtaSeconds": 3.114903173936755,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 15,
+          "emergencyEtaSeconds": 2.114903173859147,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "CLEARED",
+          "timeSeconds": 16,
+          "emergencyEtaSeconds": 2.114903173859147,
+          "reason": "CROSSING"
+        }
+      ]
+    },
+    {
+      "id": "civilian-stop-and-go",
+      "explanation": "Civilian pauses for several seconds, then accelerates; lifecycle reconciliation should handle warning clearance and renewed detection.",
+      "physicalConnectivity": "AT_GRADE",
+      "evidence": "COMPLETE",
+      "actualAmbulanceCrossingSeconds": 17.114903173790726,
+      "actualCivilianCrossingSeconds": 16.86950802336688,
+      "actualArrivalDifferenceSeconds": 0.24539515042384608,
+      "independentlyExpectedEncounter": true,
+      "anyWarningIssued": true,
+      "outcome": "TP",
+      "warningCount": 2,
+      "clearedCount": 2,
+      "firstWarningAtSeconds": 0,
+      "warningLeadSeconds": 17.114903173790726,
+      "lateWarning": false,
+      "predictedAmbulanceEtaAtCreationSeconds": 17.114903173790726,
+      "etaPredictionErrorSeconds": 0,
+      "events": [
+        {
+          "type": "CREATED",
+          "timeSeconds": 0,
+          "emergencyEtaSeconds": 17.114903173790726,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 1,
+          "emergencyEtaSeconds": 16.11490317384154,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 2,
+          "emergencyEtaSeconds": 15.114903173958048,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 3,
+          "emergencyEtaSeconds": 14.11490317397907,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 4,
+          "emergencyEtaSeconds": 13.11490317406769,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "CLEARED",
+          "timeSeconds": 5,
+          "emergencyEtaSeconds": 13.11490317406769,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "CREATED",
+          "timeSeconds": 9,
+          "emergencyEtaSeconds": 8.114903174098997,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 10,
+          "emergencyEtaSeconds": 7.114903174045789,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 11,
+          "emergencyEtaSeconds": 6.114903174066863,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 12,
+          "emergencyEtaSeconds": 5.114903174001031,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 13,
+          "emergencyEtaSeconds": 4.114903174011393,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 14,
+          "emergencyEtaSeconds": 3.114903173936755,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 15,
+          "emergencyEtaSeconds": 2.114903173859147,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 16,
+          "emergencyEtaSeconds": 1.1149031738605928,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "CLEARED",
+          "timeSeconds": 17,
+          "emergencyEtaSeconds": 1.1149031738605928,
+          "reason": "CROSSING"
+        }
+      ]
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "explanation": "Both vehicles begin farther than the 45-second detector horizon; later snapshots should be evaluated as they approach.",
+      "physicalConnectivity": "AT_GRADE",
+      "evidence": "COMPLETE",
+      "actualAmbulanceCrossingSeconds": 51.34470950224076,
+      "actualCivilianCrossingSeconds": 51.89103744229977,
+      "actualArrivalDifferenceSeconds": 0.5463279400590082,
+      "independentlyExpectedEncounter": true,
+      "anyWarningIssued": true,
+      "outcome": "TP",
+      "warningCount": 1,
+      "clearedCount": 1,
+      "firstWarningAtSeconds": 7,
+      "warningLeadSeconds": 44.34470950224076,
+      "lateWarning": false,
+      "predictedAmbulanceEtaAtCreationSeconds": 44.34470950698055,
+      "etaPredictionErrorSeconds": 4.73978900572547e-9,
+      "events": [
+        {
+          "type": "CREATED",
+          "timeSeconds": 7,
+          "emergencyEtaSeconds": 44.34470950698055,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 8,
+          "emergencyEtaSeconds": 43.344709507492404,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 9,
+          "emergencyEtaSeconds": 42.3447095078818,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 10,
+          "emergencyEtaSeconds": 41.344709508311894,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 11,
+          "emergencyEtaSeconds": 40.34470950870254,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 12,
+          "emergencyEtaSeconds": 39.34470950905469,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 13,
+          "emergencyEtaSeconds": 38.3447095093693,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 14,
+          "emergencyEtaSeconds": 37.34470950964734,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 15,
+          "emergencyEtaSeconds": 36.34470950980867,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 16,
+          "emergencyEtaSeconds": 35.34470951001641,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 17,
+          "emergencyEtaSeconds": 34.34470951019042,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 18,
+          "emergencyEtaSeconds": 33.34470951033166,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 19,
+          "emergencyEtaSeconds": 32.34470951044109,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 20,
+          "emergencyEtaSeconds": 31.34470951051967,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 21,
+          "emergencyEtaSeconds": 30.344709510487274,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 22,
+          "emergencyEtaSeconds": 29.34470951050699,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 23,
+          "emergencyEtaSeconds": 28.344709510498717,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 24,
+          "emergencyEtaSeconds": 27.3447095104634,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 25,
+          "emergencyEtaSeconds": 26.344709510402005,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 26,
+          "emergencyEtaSeconds": 25.344709510315457,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 27,
+          "emergencyEtaSeconds": 24.344709510123668,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 28,
+          "emergencyEtaSeconds": 23.344709509989727,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 29,
+          "emergencyEtaSeconds": 22.344709509833514,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 30,
+          "emergencyEtaSeconds": 21.344709509655978,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 31,
+          "emergencyEtaSeconds": 20.344709509458085,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 32,
+          "emergencyEtaSeconds": 19.34470950915971,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 33,
+          "emergencyEtaSeconds": 18.344709508923945,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 34,
+          "emergencyEtaSeconds": 17.34470950867069,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 35,
+          "emergencyEtaSeconds": 16.34470950840088,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 36,
+          "emergencyEtaSeconds": 15.344709508115471,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 37,
+          "emergencyEtaSeconds": 14.34470950781543,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 38,
+          "emergencyEtaSeconds": 13.34470950742063,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 39,
+          "emergencyEtaSeconds": 12.34470950709417,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 40,
+          "emergencyEtaSeconds": 11.344709506755937,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 41,
+          "emergencyEtaSeconds": 10.344709506406875,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 42,
+          "emergencyEtaSeconds": 9.344709506047947,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 43,
+          "emergencyEtaSeconds": 8.344709505680102,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 44,
+          "emergencyEtaSeconds": 7.344709505223226,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 45,
+          "emergencyEtaSeconds": 6.344709504840413,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 46,
+          "emergencyEtaSeconds": 5.344709504451547,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 47,
+          "emergencyEtaSeconds": 4.344709504057584,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 48,
+          "emergencyEtaSeconds": 3.3447095036594745,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 49,
+          "emergencyEtaSeconds": 2.3447095032581746,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 50,
+          "emergencyEtaSeconds": 1.3447095027735652,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 51,
+          "emergencyEtaSeconds": 0.3447095023687451,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "CLEARED",
+          "timeSeconds": 52,
+          "emergencyEtaSeconds": 0.3447095023687451,
+          "reason": "CROSSING"
+        }
+      ]
+    },
+    {
+      "id": "stationary-emergency-vehicle",
+      "explanation": "Emergency vehicle remains stopped; it never reaches the declared junction, making this a physically negative case.",
+      "physicalConnectivity": "AT_GRADE",
+      "evidence": "COMPLETE",
+      "actualAmbulanceCrossingSeconds": null,
+      "actualCivilianCrossingSeconds": 17.10693542056438,
+      "actualArrivalDifferenceSeconds": null,
+      "independentlyExpectedEncounter": false,
+      "anyWarningIssued": false,
+      "outcome": "TN",
+      "warningCount": 0,
+      "clearedCount": 0,
+      "firstWarningAtSeconds": null,
+      "warningLeadSeconds": null,
+      "lateWarning": null,
+      "predictedAmbulanceEtaAtCreationSeconds": null,
+      "etaPredictionErrorSeconds": null,
+      "events": []
+    },
+    {
+      "id": "both-slow-after-initial-warning",
+      "explanation": "Both vehicles brake after an initially synchronized prediction; their actual crossing time shifts later, measuring how inaccurate the initial ETA becomes.",
+      "physicalConnectivity": "AT_GRADE",
+      "evidence": "COMPLETE",
+      "actualAmbulanceCrossingSeconds": 28.59044345085741,
+      "actualCivilianCrossingSeconds": 28.34145149533412,
+      "actualArrivalDifferenceSeconds": 0.2489919555232909,
+      "independentlyExpectedEncounter": true,
+      "anyWarningIssued": true,
+      "outcome": "TP",
+      "warningCount": 1,
+      "clearedCount": 1,
+      "firstWarningAtSeconds": 0,
+      "warningLeadSeconds": 28.59044345085741,
+      "lateWarning": false,
+      "predictedAmbulanceEtaAtCreationSeconds": 17.114903173790726,
+      "etaPredictionErrorSeconds": -11.475540277066685,
+      "events": [
+        {
+          "type": "CREATED",
+          "timeSeconds": 0,
+          "emergencyEtaSeconds": 17.114903173790726,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 1,
+          "emergencyEtaSeconds": 16.11490317384154,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 2,
+          "emergencyEtaSeconds": 15.114903173958048,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 3,
+          "emergencyEtaSeconds": 14.11490317397907,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 4,
+          "emergencyEtaSeconds": 24.59044345137692,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 5,
+          "emergencyEtaSeconds": 23.590443451354503,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 6,
+          "emergencyEtaSeconds": 22.590443451325676,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 7,
+          "emergencyEtaSeconds": 21.59044345144273,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 8,
+          "emergencyEtaSeconds": 20.590443451401917,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 9,
+          "emergencyEtaSeconds": 19.590443451355515,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 10,
+          "emergencyEtaSeconds": 18.590443451455812,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 11,
+          "emergencyEtaSeconds": 17.59044345139905,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 12,
+          "emergencyEtaSeconds": 16.590443451489524,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 13,
+          "emergencyEtaSeconds": 15.590443451423488,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 14,
+          "emergencyEtaSeconds": 14.590443451353222,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 15,
+          "emergencyEtaSeconds": 13.590443451430998,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 16,
+          "emergencyEtaSeconds": 12.590443451353087,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 17,
+          "emergencyEtaSeconds": 11.590443451271753,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 18,
+          "emergencyEtaSeconds": 10.590443451339286,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 19,
+          "emergencyEtaSeconds": 9.590443451251934,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 20,
+          "emergencyEtaSeconds": 8.59044345116198,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 21,
+          "emergencyEtaSeconds": 7.590443451221703,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 22,
+          "emergencyEtaSeconds": 6.59044345112736,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 23,
+          "emergencyEtaSeconds": 5.590443451183234,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 24,
+          "emergencyEtaSeconds": 4.5904434510855845,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 25,
+          "emergencyEtaSeconds": 3.590443450986688,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 26,
+          "emergencyEtaSeconds": 2.5904434510388277,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 27,
+          "emergencyEtaSeconds": 1.5904434509382537,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "UPDATED",
+          "timeSeconds": 28,
+          "emergencyEtaSeconds": 0.5904434508372479,
+          "reason": "CROSSING"
+        },
+        {
+          "type": "CLEARED",
+          "timeSeconds": 29,
+          "emergencyEtaSeconds": 0.5904434508372479,
+          "reason": "CROSSING"
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "All route geometry, physical connectivity labels and speed profiles are synthetic and manually authored.",
+    "Independent arrival times use the same deterministic simulation motion model, but never read detector ETAs or warning outcomes.",
+    "A modeled at-grade crossing within five seconds is the test policy label; it is not a collision or observed emergency.",
+    "Warning lead time is first CREATED time to simulated ambulance junction arrival, not measured human reaction time.",
+    "The ten-second late threshold is an evaluation benchmark chosen for this study, not an established road-safety standard.",
+    "One-second detection sampling and 100-millisecond arrival interpolation introduce finite timing resolution.",
+    "Negative cases with an early warning are false positives relative to the final speed profile, not claims about field performance.",
+    "These results are not real-world precision, recall, warning usefulness, or collision-prevention evidence."
+  ]
+}
