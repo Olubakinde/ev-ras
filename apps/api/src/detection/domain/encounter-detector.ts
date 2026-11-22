@@ -33,6 +33,9 @@ export interface EncounterCandidate {
   readonly etaDifferenceSeconds: number | null;
 }
 
+/** Optional, experimental travel-time model. null means that arrival is not predicted. */
+export type ArrivalTimeEstimator = (journey: VehicleJourney, distanceM: number) => number | null;
+
 /** A policy applied BEFORE the per-driver best-candidate selection. */
 export type CandidateEligibility = (candidate: EncounterCandidate) => boolean;
 
@@ -178,11 +181,27 @@ function hasSharedSegment(
 /**
  * Evaluates one civilian against one emergency vehicle.
  */
+function estimatedTravelTime(
+  journey: VehicleJourney,
+  distanceM: number,
+  estimator: ArrivalTimeEstimator | undefined,
+): number | null {
+  const result = estimator
+    ? estimator(journey, distanceM)
+    : distanceM / journey.state.vehicle.speedMps;
+  if (result === null) return null;
+  if (!Number.isFinite(result) || result < 0) {
+    throw new RangeError('Arrival estimator returned an invalid ETA');
+  }
+  return result;
+}
+
 function evaluateDriver(
   emergency: VehicleJourney,
   civilian: VehicleJourney,
   settings: Required<DetectionOptions>,
   acceptCandidate: CandidateEligibility,
+  estimateArrival?: ArrivalTimeEstimator,
 ): EncounterCandidate | null {
   const ambulance = emergency.state.vehicle;
   const driver = civilian.state.vehicle;
@@ -214,13 +233,12 @@ function evaluateDriver(
       { units: 'meters' },
     );
 
-    const eta =
-      closest.properties.location / ambulance.speedMps;
+    const eta = estimatedTravelTime(emergency, closest.properties.location, estimateArrival);
 
     if (
       closest.properties.dist >
         settings.routeToleranceMeters ||
-      eta > settings.horizonSeconds
+      eta === null || eta > settings.horizonSeconds
     ) {
       return null;
     }
@@ -307,12 +325,11 @@ function evaluateDriver(
       continue;
     }
 
-    const emergencyEta =
-      e.properties.location / ambulance.speedMps;
+    const emergencyEta = estimatedTravelTime(emergency, e.properties.location, estimateArrival);
 
-    const civilianEta =
-      c.properties.location / driver.speedMps;
+    const civilianEta = estimatedTravelTime(civilian, c.properties.location, estimateArrival);
 
+    if (emergencyEta === null || civilianEta === null) continue;
     const difference = Math.abs(
       emergencyEta - civilianEta,
     );
@@ -375,6 +392,7 @@ export function detectEncounters(
   civilians: readonly VehicleJourney[],
   options: DetectionOptions = {},
   acceptCandidate: CandidateEligibility = () => true,
+  estimateArrival?: ArrivalTimeEstimator,
 ): EncounterCandidate[] {
   const settings = { ...DEFAULTS, ...options };
 
@@ -407,6 +425,7 @@ export function detectEncounters(
       civilian,
       settings,
       acceptCandidate,
+      estimateArrival,
     );
 
     if (encounter) {

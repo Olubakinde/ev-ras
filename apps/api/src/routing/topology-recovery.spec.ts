@@ -27,7 +27,7 @@ function response(
   };
 }
 
-function clientFor(replies: readonly (unknown | Error)[], enabled = true) {
+function clientFor(replies: readonly unknown[], enabled = true) {
   const urls: string[] = [];
   let index = 0;
   const request = (async (input: string | URL | Request): Promise<Response> => {

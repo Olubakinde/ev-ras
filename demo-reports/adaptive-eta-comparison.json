@@ -1,0 +1,953 @@
+{
+  "comparisonKind": "MATCHED_SIMULATED_ALERT_UPDATE_TIMES",
+  "pairedSamples": [
+    {
+      "id": "early-synchronized-crossing",
+      "timeSeconds": 0,
+      "baselineErrorSeconds": 0,
+      "adaptiveErrorSeconds": 0
+    },
+    {
+      "id": "early-synchronized-crossing",
+      "timeSeconds": 1,
+      "baselineErrorSeconds": 5.0814463747883565e-11,
+      "adaptiveErrorSeconds": 5.0814463747883565e-11
+    },
+    {
+      "id": "early-synchronized-crossing",
+      "timeSeconds": 2,
+      "baselineErrorSeconds": 1.673221561304672e-10,
+      "adaptiveErrorSeconds": 1.673221561304672e-10
+    },
+    {
+      "id": "early-synchronized-crossing",
+      "timeSeconds": 3,
+      "baselineErrorSeconds": 1.8834356296792976e-10,
+      "adaptiveErrorSeconds": 1.8834356296792976e-10
+    },
+    {
+      "id": "early-synchronized-crossing",
+      "timeSeconds": 4,
+      "baselineErrorSeconds": 2.7696600568560825e-10,
+      "adaptiveErrorSeconds": 2.7696600568560825e-10
+    },
+    {
+      "id": "early-synchronized-crossing",
+      "timeSeconds": 5,
+      "baselineErrorSeconds": 2.7200997010368155e-10,
+      "adaptiveErrorSeconds": 2.7200997010368155e-10
+    },
+    {
+      "id": "early-synchronized-crossing",
+      "timeSeconds": 6,
+      "baselineErrorSeconds": 3.3656277764748666e-10,
+      "adaptiveErrorSeconds": 3.3656277764748666e-10
+    },
+    {
+      "id": "early-synchronized-crossing",
+      "timeSeconds": 7,
+      "baselineErrorSeconds": 3.0943780870984483e-10,
+      "adaptiveErrorSeconds": 3.0943780870984483e-10
+    },
+    {
+      "id": "early-synchronized-crossing",
+      "timeSeconds": 8,
+      "baselineErrorSeconds": 2.7266722213425965e-10,
+      "adaptiveErrorSeconds": 2.7266722213425965e-10
+    },
+    {
+      "id": "early-synchronized-crossing",
+      "timeSeconds": 9,
+      "baselineErrorSeconds": 3.0827251862319827e-10,
+      "adaptiveErrorSeconds": 3.0827251862319827e-10
+    },
+    {
+      "id": "early-synchronized-crossing",
+      "timeSeconds": 10,
+      "baselineErrorSeconds": 2.5506352585580316e-10,
+      "adaptiveErrorSeconds": 2.5506352585580316e-10
+    },
+    {
+      "id": "early-synchronized-crossing",
+      "timeSeconds": 11,
+      "baselineErrorSeconds": 2.7613822339844774e-10,
+      "adaptiveErrorSeconds": 2.7613822339844774e-10
+    },
+    {
+      "id": "early-synchronized-crossing",
+      "timeSeconds": 12,
+      "baselineErrorSeconds": 2.1030643893027445e-10,
+      "adaptiveErrorSeconds": 2.1030643893027445e-10
+    },
+    {
+      "id": "early-synchronized-crossing",
+      "timeSeconds": 13,
+      "baselineErrorSeconds": 2.2066615201765671e-10,
+      "adaptiveErrorSeconds": 2.2066615201765671e-10
+    },
+    {
+      "id": "early-synchronized-crossing",
+      "timeSeconds": 14,
+      "baselineErrorSeconds": 1.460307430534158e-10,
+      "adaptiveErrorSeconds": 1.460307430534158e-10
+    },
+    {
+      "id": "early-synchronized-crossing",
+      "timeSeconds": 15,
+      "baselineErrorSeconds": 6.842171274001885e-11,
+      "adaptiveErrorSeconds": 6.842171274001885e-11
+    },
+    {
+      "id": "early-synchronized-crossing",
+      "timeSeconds": 16,
+      "baselineErrorSeconds": 6.986766720729065e-11,
+      "adaptiveErrorSeconds": 6.986766720729065e-11
+    },
+    {
+      "id": "early-synchronized-crossing",
+      "timeSeconds": 17,
+      "baselineErrorSeconds": 1.0821565865626326e-11,
+      "adaptiveErrorSeconds": 1.0821565865626326e-11
+    },
+    {
+      "id": "late-synchronized-crossing",
+      "timeSeconds": 0,
+      "baselineErrorSeconds": 0,
+      "adaptiveErrorSeconds": 0
+    },
+    {
+      "id": "late-synchronized-crossing",
+      "timeSeconds": 1,
+      "baselineErrorSeconds": 3.5211833449011465e-12,
+      "adaptiveErrorSeconds": 3.5211833449011465e-12
+    },
+    {
+      "id": "late-synchronized-crossing",
+      "timeSeconds": 2,
+      "baselineErrorSeconds": 5.001776770541255e-12,
+      "adaptiveErrorSeconds": 5.001776770541255e-12
+    },
+    {
+      "id": "late-synchronized-crossing",
+      "timeSeconds": 3,
+      "baselineErrorSeconds": 5.398348434937361e-12,
+      "adaptiveErrorSeconds": 5.398348434937361e-12
+    },
+    {
+      "id": "moderate-speed-crossing",
+      "timeSeconds": 0,
+      "baselineErrorSeconds": 8.881784197001252e-15,
+      "adaptiveErrorSeconds": 8.881784197001252e-15
+    },
+    {
+      "id": "moderate-speed-crossing",
+      "timeSeconds": 1,
+      "baselineErrorSeconds": 8.601119816376013e-12,
+      "adaptiveErrorSeconds": 8.601119816376013e-12
+    },
+    {
+      "id": "moderate-speed-crossing",
+      "timeSeconds": 2,
+      "baselineErrorSeconds": 7.763389930914855e-11,
+      "adaptiveErrorSeconds": 7.763389930914855e-11
+    },
+    {
+      "id": "moderate-speed-crossing",
+      "timeSeconds": 3,
+      "baselineErrorSeconds": 6.52455867111712e-11,
+      "adaptiveErrorSeconds": 6.52455867111712e-11
+    },
+    {
+      "id": "moderate-speed-crossing",
+      "timeSeconds": 4,
+      "baselineErrorSeconds": 1.1573142444376572e-10,
+      "adaptiveErrorSeconds": 1.1573142444376572e-10
+    },
+    {
+      "id": "moderate-speed-crossing",
+      "timeSeconds": 5,
+      "baselineErrorSeconds": 8.72475425239827e-11,
+      "adaptiveErrorSeconds": 8.72475425239827e-11
+    },
+    {
+      "id": "moderate-speed-crossing",
+      "timeSeconds": 6,
+      "baselineErrorSeconds": 5.255351709365641e-11,
+      "adaptiveErrorSeconds": 5.255351709365641e-11
+    },
+    {
+      "id": "moderate-speed-crossing",
+      "timeSeconds": 7,
+      "baselineErrorSeconds": 8.44107006514605e-11,
+      "adaptiveErrorSeconds": 8.44107006514605e-11
+    },
+    {
+      "id": "moderate-speed-crossing",
+      "timeSeconds": 8,
+      "baselineErrorSeconds": 4.097344685760618e-11,
+      "adaptiveErrorSeconds": 4.097344685760618e-11
+    },
+    {
+      "id": "moderate-speed-crossing",
+      "timeSeconds": 9,
+      "baselineErrorSeconds": 4.9968917892329046e-12,
+      "adaptiveErrorSeconds": 4.9968917892329046e-12
+    },
+    {
+      "id": "moderate-speed-crossing",
+      "timeSeconds": 10,
+      "baselineErrorSeconds": 1.9257484495938115e-11,
+      "adaptiveErrorSeconds": 1.9257484495938115e-11
+    },
+    {
+      "id": "civilian-brakes-after-warning",
+      "timeSeconds": 0,
+      "baselineErrorSeconds": 0,
+      "adaptiveErrorSeconds": 0
+    },
+    {
+      "id": "civilian-brakes-after-warning",
+      "timeSeconds": 1,
+      "baselineErrorSeconds": 5.0814463747883565e-11,
+      "adaptiveErrorSeconds": 5.0814463747883565e-11
+    },
+    {
+      "id": "civilian-brakes-after-warning",
+      "timeSeconds": 2,
+      "baselineErrorSeconds": 1.673221561304672e-10,
+      "adaptiveErrorSeconds": 1.673221561304672e-10
+    },
+    {
+      "id": "civilian-brakes-after-warning",
+      "timeSeconds": 3,
+      "baselineErrorSeconds": 1.8834356296792976e-10,
+      "adaptiveErrorSeconds": 1.8834356296792976e-10
+    },
+    {
+      "id": "civilian-brakes-after-warning",
+      "timeSeconds": 4,
+      "baselineErrorSeconds": 2.7696600568560825e-10,
+      "adaptiveErrorSeconds": 2.7696600568560825e-10
+    },
+    {
+      "id": "civilian-accelerates-into-conflict",
+      "timeSeconds": 5,
+      "baselineErrorSeconds": 2.7200997010368155e-10,
+      "adaptiveErrorSeconds": 2.7200997010368155e-10
+    },
+    {
+      "id": "civilian-accelerates-into-conflict",
+      "timeSeconds": 6,
+      "baselineErrorSeconds": 3.3656277764748666e-10,
+      "adaptiveErrorSeconds": 3.3656277764748666e-10
+    },
+    {
+      "id": "civilian-accelerates-into-conflict",
+      "timeSeconds": 7,
+      "baselineErrorSeconds": 3.0943780870984483e-10,
+      "adaptiveErrorSeconds": 3.0943780870984483e-10
+    },
+    {
+      "id": "civilian-accelerates-into-conflict",
+      "timeSeconds": 8,
+      "baselineErrorSeconds": 2.7266722213425965e-10,
+      "adaptiveErrorSeconds": 2.7266722213425965e-10
+    },
+    {
+      "id": "civilian-accelerates-into-conflict",
+      "timeSeconds": 9,
+      "baselineErrorSeconds": 3.0827251862319827e-10,
+      "adaptiveErrorSeconds": 3.0827251862319827e-10
+    },
+    {
+      "id": "civilian-accelerates-into-conflict",
+      "timeSeconds": 10,
+      "baselineErrorSeconds": 2.5506352585580316e-10,
+      "adaptiveErrorSeconds": 2.5506352585580316e-10
+    },
+    {
+      "id": "civilian-accelerates-into-conflict",
+      "timeSeconds": 11,
+      "baselineErrorSeconds": 2.7613822339844774e-10,
+      "adaptiveErrorSeconds": 2.7613822339844774e-10
+    },
+    {
+      "id": "civilian-accelerates-into-conflict",
+      "timeSeconds": 12,
+      "baselineErrorSeconds": 2.1030643893027445e-10,
+      "adaptiveErrorSeconds": 2.1030643893027445e-10
+    },
+    {
+      "id": "civilian-accelerates-into-conflict",
+      "timeSeconds": 13,
+      "baselineErrorSeconds": 2.2066615201765671e-10,
+      "adaptiveErrorSeconds": 2.2066615201765671e-10
+    },
+    {
+      "id": "civilian-accelerates-into-conflict",
+      "timeSeconds": 14,
+      "baselineErrorSeconds": 1.460307430534158e-10,
+      "adaptiveErrorSeconds": 1.460307430534158e-10
+    },
+    {
+      "id": "civilian-accelerates-into-conflict",
+      "timeSeconds": 15,
+      "baselineErrorSeconds": 6.842171274001885e-11,
+      "adaptiveErrorSeconds": 6.842171274001885e-11
+    },
+    {
+      "id": "civilian-stop-and-go",
+      "timeSeconds": 0,
+      "baselineErrorSeconds": 0,
+      "adaptiveErrorSeconds": 0
+    },
+    {
+      "id": "civilian-stop-and-go",
+      "timeSeconds": 1,
+      "baselineErrorSeconds": 5.0814463747883565e-11,
+      "adaptiveErrorSeconds": 5.0814463747883565e-11
+    },
+    {
+      "id": "civilian-stop-and-go",
+      "timeSeconds": 2,
+      "baselineErrorSeconds": 1.673221561304672e-10,
+      "adaptiveErrorSeconds": 1.673221561304672e-10
+    },
+    {
+      "id": "civilian-stop-and-go",
+      "timeSeconds": 3,
+      "baselineErrorSeconds": 1.8834356296792976e-10,
+      "adaptiveErrorSeconds": 1.8834356296792976e-10
+    },
+    {
+      "id": "civilian-stop-and-go",
+      "timeSeconds": 4,
+      "baselineErrorSeconds": 2.7696600568560825e-10,
+      "adaptiveErrorSeconds": 2.7696600568560825e-10
+    },
+    {
+      "id": "civilian-stop-and-go",
+      "timeSeconds": 9,
+      "baselineErrorSeconds": 3.0827251862319827e-10,
+      "adaptiveErrorSeconds": 3.0827251862319827e-10
+    },
+    {
+      "id": "civilian-stop-and-go",
+      "timeSeconds": 10,
+      "baselineErrorSeconds": 2.5506352585580316e-10,
+      "adaptiveErrorSeconds": 2.5506352585580316e-10
+    },
+    {
+      "id": "civilian-stop-and-go",
+      "timeSeconds": 11,
+      "baselineErrorSeconds": 2.7613822339844774e-10,
+      "adaptiveErrorSeconds": 2.7613822339844774e-10
+    },
+    {
+      "id": "civilian-stop-and-go",
+      "timeSeconds": 12,
+      "baselineErrorSeconds": 2.1030643893027445e-10,
+      "adaptiveErrorSeconds": 2.1030643893027445e-10
+    },
+    {
+      "id": "civilian-stop-and-go",
+      "timeSeconds": 13,
+      "baselineErrorSeconds": 2.2066615201765671e-10,
+      "adaptiveErrorSeconds": 2.2066615201765671e-10
+    },
+    {
+      "id": "civilian-stop-and-go",
+      "timeSeconds": 14,
+      "baselineErrorSeconds": 1.460307430534158e-10,
+      "adaptiveErrorSeconds": 1.460307430534158e-10
+    },
+    {
+      "id": "civilian-stop-and-go",
+      "timeSeconds": 15,
+      "baselineErrorSeconds": 6.842171274001885e-11,
+      "adaptiveErrorSeconds": 6.842171274001885e-11
+    },
+    {
+      "id": "civilian-stop-and-go",
+      "timeSeconds": 16,
+      "baselineErrorSeconds": 6.986766720729065e-11,
+      "adaptiveErrorSeconds": 6.986766720729065e-11
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 7,
+      "baselineErrorSeconds": 4.73978900572547e-9,
+      "adaptiveErrorSeconds": 4.73978900572547e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 8,
+      "baselineErrorSeconds": 5.251642676284973e-9,
+      "adaptiveErrorSeconds": 5.251642676284973e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 9,
+      "baselineErrorSeconds": 5.641041411763581e-9,
+      "adaptiveErrorSeconds": 5.641041411763581e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 10,
+      "baselineErrorSeconds": 6.07113292971917e-9,
+      "adaptiveErrorSeconds": 6.07113292971917e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 11,
+      "baselineErrorSeconds": 6.461782220412715e-9,
+      "adaptiveErrorSeconds": 6.461782220412715e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 12,
+      "baselineErrorSeconds": 6.813927200255421e-9,
+      "adaptiveErrorSeconds": 6.813927200255421e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 13,
+      "baselineErrorSeconds": 7.128541312795278e-9,
+      "adaptiveErrorSeconds": 7.128541312795278e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 14,
+      "baselineErrorSeconds": 7.406576685298205e-9,
+      "adaptiveErrorSeconds": 7.406576685298205e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 15,
+      "baselineErrorSeconds": 7.567912518879893e-9,
+      "adaptiveErrorSeconds": 7.567912518879893e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 16,
+      "baselineErrorSeconds": 7.775646793106716e-9,
+      "adaptiveErrorSeconds": 7.775646793106716e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 17,
+      "baselineErrorSeconds": 7.949658709094365e-9,
+      "adaptiveErrorSeconds": 7.949658709094365e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 18,
+      "baselineErrorSeconds": 8.090900394108758e-9,
+      "adaptiveErrorSeconds": 8.090900394108758e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 19,
+      "baselineErrorSeconds": 8.20033108084317e-9,
+      "adaptiveErrorSeconds": 8.20033108084317e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 20,
+      "baselineErrorSeconds": 8.27891000199088e-9,
+      "adaptiveErrorSeconds": 8.27891000199088e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 21,
+      "baselineErrorSeconds": 8.246516358667577e-9,
+      "adaptiveErrorSeconds": 8.246516358667577e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 22,
+      "baselineErrorSeconds": 8.266226814157562e-9,
+      "adaptiveErrorSeconds": 8.266226814157562e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 23,
+      "baselineErrorSeconds": 8.257956096713315e-9,
+      "adaptiveErrorSeconds": 8.257956096713315e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 24,
+      "baselineErrorSeconds": 8.222642122746038e-9,
+      "adaptiveErrorSeconds": 8.222642122746038e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 25,
+      "baselineErrorSeconds": 8.161244124949008e-9,
+      "adaptiveErrorSeconds": 8.161244124949008e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 26,
+      "baselineErrorSeconds": 8.07469291430607e-9,
+      "adaptiveErrorSeconds": 8.07469291430607e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 27,
+      "baselineErrorSeconds": 7.882903219069703e-9,
+      "adaptiveErrorSeconds": 7.882903219069703e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 28,
+      "baselineErrorSeconds": 7.748965913378925e-9,
+      "adaptiveErrorSeconds": 7.748965913378925e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 29,
+      "baselineErrorSeconds": 7.592753092922067e-9,
+      "adaptiveErrorSeconds": 7.592753092922067e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 30,
+      "baselineErrorSeconds": 7.415216884965048e-9,
+      "adaptiveErrorSeconds": 7.415216884965048e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 31,
+      "baselineErrorSeconds": 7.2173236276285024e-9,
+      "adaptiveErrorSeconds": 7.2173236276285024e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 32,
+      "baselineErrorSeconds": 6.918952522028121e-9,
+      "adaptiveErrorSeconds": 6.918952522028121e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 33,
+      "baselineErrorSeconds": 6.683180231448205e-9,
+      "adaptiveErrorSeconds": 6.683180231448205e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 34,
+      "baselineErrorSeconds": 6.42992858956859e-9,
+      "adaptiveErrorSeconds": 6.42992858956859e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 35,
+      "baselineErrorSeconds": 6.1601213019457646e-9,
+      "adaptiveErrorSeconds": 6.1601213019457646e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 36,
+      "baselineErrorSeconds": 5.8747104958456475e-9,
+      "adaptiveErrorSeconds": 5.8747104958456475e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 37,
+      "baselineErrorSeconds": 5.57466961481623e-9,
+      "adaptiveErrorSeconds": 5.57466961481623e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 38,
+      "baselineErrorSeconds": 5.1798707545458456e-9,
+      "adaptiveErrorSeconds": 5.1798707545458456e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 39,
+      "baselineErrorSeconds": 4.85340478917351e-9,
+      "adaptiveErrorSeconds": 4.85340478917351e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 40,
+      "baselineErrorSeconds": 4.515172236096987e-9,
+      "adaptiveErrorSeconds": 4.515172236096987e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 41,
+      "baselineErrorSeconds": 4.16611101172748e-9,
+      "adaptiveErrorSeconds": 4.16611101172748e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 42,
+      "baselineErrorSeconds": 3.807187454185623e-9,
+      "adaptiveErrorSeconds": 3.807187454185623e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 43,
+      "baselineErrorSeconds": 3.4393394798826193e-9,
+      "adaptiveErrorSeconds": 3.4393394798826193e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 44,
+      "baselineErrorSeconds": 2.9824676062162325e-9,
+      "adaptiveErrorSeconds": 2.9824676062162325e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 45,
+      "baselineErrorSeconds": 2.5996484964707633e-9,
+      "adaptiveErrorSeconds": 2.5996484964707633e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 46,
+      "baselineErrorSeconds": 2.2107826680439757e-9,
+      "adaptiveErrorSeconds": 2.2107826680439757e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 47,
+      "baselineErrorSeconds": 1.8168222482017882e-9,
+      "adaptiveErrorSeconds": 1.8168222482017882e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 48,
+      "baselineErrorSeconds": 1.4187122587827616e-9,
+      "adaptiveErrorSeconds": 1.4187122587827616e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 49,
+      "baselineErrorSeconds": 1.0174119324801723e-9,
+      "adaptiveErrorSeconds": 1.0174119324801723e-9
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 50,
+      "baselineErrorSeconds": 5.328075758370687e-10,
+      "adaptiveErrorSeconds": 5.328075758370687e-10
+    },
+    {
+      "id": "approach-enters-prediction-horizon",
+      "timeSeconds": 51,
+      "baselineErrorSeconds": 1.2798295756510925e-10,
+      "adaptiveErrorSeconds": 1.2798295756510925e-10
+    },
+    {
+      "id": "both-slow-after-initial-warning",
+      "timeSeconds": 0,
+      "baselineErrorSeconds": 11.475540277066685,
+      "adaptiveErrorSeconds": 11.475540277066685
+    },
+    {
+      "id": "both-slow-after-initial-warning",
+      "timeSeconds": 1,
+      "baselineErrorSeconds": 11.47554027701587,
+      "adaptiveErrorSeconds": 11.47554027701587
+    },
+    {
+      "id": "both-slow-after-initial-warning",
+      "timeSeconds": 2,
+      "baselineErrorSeconds": 11.475540276899363,
+      "adaptiveErrorSeconds": 11.475540276899363
+    },
+    {
+      "id": "both-slow-after-initial-warning",
+      "timeSeconds": 3,
+      "baselineErrorSeconds": 11.475540276878341,
+      "adaptiveErrorSeconds": 11.475540276878341
+    },
+    {
+      "id": "both-slow-after-initial-warning",
+      "timeSeconds": 4,
+      "baselineErrorSeconds": 5.195097685373185e-10,
+      "adaptiveErrorSeconds": 5.195097685373185e-10
+    },
+    {
+      "id": "both-slow-after-initial-warning",
+      "timeSeconds": 5,
+      "baselineErrorSeconds": 4.970921452240873e-10,
+      "adaptiveErrorSeconds": 4.970921452240873e-10
+    },
+    {
+      "id": "both-slow-after-initial-warning",
+      "timeSeconds": 6,
+      "baselineErrorSeconds": 4.682654264343e-10,
+      "adaptiveErrorSeconds": 4.682654264343e-10
+    },
+    {
+      "id": "both-slow-after-initial-warning",
+      "timeSeconds": 7,
+      "baselineErrorSeconds": 5.853202367234189e-10,
+      "adaptiveErrorSeconds": 5.853202367234189e-10
+    },
+    {
+      "id": "both-slow-after-initial-warning",
+      "timeSeconds": 8,
+      "baselineErrorSeconds": 5.445066619813588e-10,
+      "adaptiveErrorSeconds": 5.445066619813588e-10
+    },
+    {
+      "id": "both-slow-after-initial-warning",
+      "timeSeconds": 9,
+      "baselineErrorSeconds": 4.981046686225454e-10,
+      "adaptiveErrorSeconds": 4.981046686225454e-10
+    },
+    {
+      "id": "both-slow-after-initial-warning",
+      "timeSeconds": 10,
+      "baselineErrorSeconds": 5.984013284887624e-10,
+      "adaptiveErrorSeconds": 5.984013284887624e-10
+    },
+    {
+      "id": "both-slow-after-initial-warning",
+      "timeSeconds": 11,
+      "baselineErrorSeconds": 5.416396220425668e-10,
+      "adaptiveErrorSeconds": 5.416396220425668e-10
+    },
+    {
+      "id": "both-slow-after-initial-warning",
+      "timeSeconds": 12,
+      "baselineErrorSeconds": 6.321130285869003e-10,
+      "adaptiveErrorSeconds": 6.321130285869003e-10
+    },
+    {
+      "id": "both-slow-after-initial-warning",
+      "timeSeconds": 13,
+      "baselineErrorSeconds": 5.660787394390354e-10,
+      "adaptiveErrorSeconds": 5.660787394390354e-10
+    },
+    {
+      "id": "both-slow-after-initial-warning",
+      "timeSeconds": 14,
+      "baselineErrorSeconds": 4.958131682997191e-10,
+      "adaptiveErrorSeconds": 4.958131682997191e-10
+    },
+    {
+      "id": "both-slow-after-initial-warning",
+      "timeSeconds": 15,
+      "baselineErrorSeconds": 5.735891761560197e-10,
+      "adaptiveErrorSeconds": 5.735891761560197e-10
+    },
+    {
+      "id": "both-slow-after-initial-warning",
+      "timeSeconds": 16,
+      "baselineErrorSeconds": 4.956781651799247e-10,
+      "adaptiveErrorSeconds": 4.956781651799247e-10
+    },
+    {
+      "id": "both-slow-after-initial-warning",
+      "timeSeconds": 17,
+      "baselineErrorSeconds": 4.14342338217466e-10,
+      "adaptiveErrorSeconds": 4.14342338217466e-10
+    },
+    {
+      "id": "both-slow-after-initial-warning",
+      "timeSeconds": 18,
+      "baselineErrorSeconds": 4.818758725377847e-10,
+      "adaptiveErrorSeconds": 4.818758725377847e-10
+    },
+    {
+      "id": "both-slow-after-initial-warning",
+      "timeSeconds": 19,
+      "baselineErrorSeconds": 3.9452530131711683e-10,
+      "adaptiveErrorSeconds": 3.9452530131711683e-10
+    },
+    {
+      "id": "both-slow-after-initial-warning",
+      "timeSeconds": 20,
+      "baselineErrorSeconds": 3.0457059096988814e-10,
+      "adaptiveErrorSeconds": 3.0457059096988814e-10
+    },
+    {
+      "id": "both-slow-after-initial-warning",
+      "timeSeconds": 21,
+      "baselineErrorSeconds": 3.6429170791052456e-10,
+      "adaptiveErrorSeconds": 3.6429170791052456e-10
+    },
+    {
+      "id": "both-slow-after-initial-warning",
+      "timeSeconds": 22,
+      "baselineErrorSeconds": 2.6994939616997726e-10,
+      "adaptiveErrorSeconds": 2.6994939616997726e-10
+    },
+    {
+      "id": "both-slow-after-initial-warning",
+      "timeSeconds": 23,
+      "baselineErrorSeconds": 3.2582292419647274e-10,
+      "adaptiveErrorSeconds": 3.2582292419647274e-10
+    },
+    {
+      "id": "both-slow-after-initial-warning",
+      "timeSeconds": 24,
+      "baselineErrorSeconds": 2.2817303602096217e-10,
+      "adaptiveErrorSeconds": 2.2817303602096217e-10
+    },
+    {
+      "id": "both-slow-after-initial-warning",
+      "timeSeconds": 25,
+      "baselineErrorSeconds": 1.2927614534419263e-10,
+      "adaptiveErrorSeconds": 1.2927614534419263e-10
+    },
+    {
+      "id": "both-slow-after-initial-warning",
+      "timeSeconds": 26,
+      "baselineErrorSeconds": 1.8141577129426878e-10,
+      "adaptiveErrorSeconds": 1.8141577129426878e-10
+    },
+    {
+      "id": "both-slow-after-initial-warning",
+      "timeSeconds": 27,
+      "baselineErrorSeconds": 8.08419997611054e-11,
+      "adaptiveErrorSeconds": 8.08419997611054e-11
+    },
+    {
+      "id": "both-slow-after-initial-warning",
+      "timeSeconds": 28,
+      "baselineErrorSeconds": 2.0161650127192843e-11,
+      "adaptiveErrorSeconds": 2.0161650127192843e-11
+    },
+    {
+      "id": "15b-gradual-ambulance-braking",
+      "timeSeconds": 0,
+      "baselineErrorSeconds": 7.743268782527053,
+      "adaptiveErrorSeconds": 7.743268782527053
+    },
+    {
+      "id": "15b-gradual-ambulance-braking",
+      "timeSeconds": 1,
+      "baselineErrorSeconds": 7.743268782476239,
+      "adaptiveErrorSeconds": 7.743268782476239
+    },
+    {
+      "id": "15b-gradual-ambulance-braking",
+      "timeSeconds": 2,
+      "baselineErrorSeconds": 7.743268782359731,
+      "adaptiveErrorSeconds": 7.743268782359731
+    },
+    {
+      "id": "15b-gradual-ambulance-braking",
+      "timeSeconds": 3,
+      "baselineErrorSeconds": 6.735061412768776,
+      "adaptiveErrorSeconds": 6.735061412768776
+    },
+    {
+      "id": "15b-gradual-ambulance-acceleration",
+      "timeSeconds": 7,
+      "baselineErrorSeconds": 0.9765030090917897,
+      "adaptiveErrorSeconds": 1.493067389133369
+    },
+    {
+      "id": "15b-gradual-ambulance-acceleration",
+      "timeSeconds": 8,
+      "baselineErrorSeconds": 2.821458622292994e-10,
+      "adaptiveErrorSeconds": 1.9755069023751268
+    },
+    {
+      "id": "15b-gradual-ambulance-acceleration",
+      "timeSeconds": 9,
+      "baselineErrorSeconds": 2.8622793024624116e-10,
+      "adaptiveErrorSeconds": 2.8622793024624116e-10
+    },
+    {
+      "id": "15b-gradual-ambulance-acceleration",
+      "timeSeconds": 10,
+      "baselineErrorSeconds": 3.67453623084657e-10,
+      "adaptiveErrorSeconds": 3.67453623084657e-10
+    },
+    {
+      "id": "15b-gradual-ambulance-acceleration",
+      "timeSeconds": 11,
+      "baselineErrorSeconds": 3.5292657685204176e-10,
+      "adaptiveErrorSeconds": 3.5292657685204176e-10
+    },
+    {
+      "id": "15b-gradual-ambulance-acceleration",
+      "timeSeconds": 12,
+      "baselineErrorSeconds": 3.30341975995907e-10,
+      "adaptiveErrorSeconds": 3.30341975995907e-10
+    },
+    {
+      "id": "15b-gradual-ambulance-acceleration",
+      "timeSeconds": 13,
+      "baselineErrorSeconds": 3.005347082307708e-10,
+      "adaptiveErrorSeconds": 3.005347082307708e-10
+    },
+    {
+      "id": "15b-gradual-ambulance-acceleration",
+      "timeSeconds": 14,
+      "baselineErrorSeconds": 2.6433255584379367e-10,
+      "adaptiveErrorSeconds": 2.6433255584379367e-10
+    },
+    {
+      "id": "15b-gradual-ambulance-acceleration",
+      "timeSeconds": 15,
+      "baselineErrorSeconds": 2.2256330112213618e-10,
+      "adaptiveErrorSeconds": 2.2256330112213618e-10
+    },
+    {
+      "id": "15b-gradual-ambulance-acceleration",
+      "timeSeconds": 16,
+      "baselineErrorSeconds": 1.7606538449399523e-10,
+      "adaptiveErrorSeconds": 1.7606538449399523e-10
+    },
+    {
+      "id": "15b-gradual-ambulance-acceleration",
+      "timeSeconds": 17,
+      "baselineErrorSeconds": 1.2566303553285252e-10,
+      "adaptiveErrorSeconds": 1.2566303553285252e-10
+    }
+  ],
+  "baselineAbsoluteErrorSeconds": {
+    "count": 151,
+    "mean": 0.5088975639760563,
+    "median": 3.2582292419647274e-10
+  },
+  "adaptiveAbsoluteErrorSeconds": {
+    "count": 151,
+    "mean": 0.5254013473014507,
+    "median": 3.30341975995907e-10
+  },
+  "classificationChanges": [],
+  "caveats": [
+    "All fixtures are hand-authored synthetic scenes; this is NOT measured road performance.",
+    "Matched-update errors exclude times when one model produced no warning; classificationChanges must be reviewed separately.",
+    "An acceleration forecast does not anticipate arbitrary future stops or speed changes.",
+    "Default detector behavior remains constant-speed unless EVRAS_ADAPTIVE_ETA=1 is enabled."
+  ],
+  "scenarios": 14,
+  "baselineConfusion": {
+    "samples": 14,
+    "truePositive": 8,
+    "falsePositive": 2,
+    "trueNegative": 3,
+    "falseNegative": 1,
+    "precision": 0.8,
+    "recall": 0.8888888888888888,
+    "specificity": 0.6,
+    "f1": 0.8421052631578947,
+    "balancedAccuracy": 0.7444444444444445
+  },
+  "adaptiveConfusion": {
+    "samples": 14,
+    "truePositive": 8,
+    "falsePositive": 2,
+    "trueNegative": 3,
+    "falseNegative": 1,
+    "precision": 0.8,
+    "recall": 0.8888888888888888,
+    "specificity": 0.6,
+    "f1": 0.8421052631578947,
+    "balancedAccuracy": 0.7444444444444445
+  }
+}
