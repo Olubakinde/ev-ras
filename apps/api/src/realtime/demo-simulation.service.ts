@@ -17,6 +17,7 @@ import type {
   VehicleRoadTopology,
 } from '../detection/domain/road-topology.js';
 
+import { AdaptiveEtaTracker } from '../detection/domain/adaptive-eta.js';
 import { OsrmClient, type DrivingRoute } from '../routing/osrm-client.js';
 
 import {
@@ -78,6 +79,9 @@ export class DemoSimulationService {
   private topologies: readonly VehicleRoadTopology[] = [];
   private loading = false;
   private traffic: MixedTrafficScenario | null = null;
+  // Experimental. Default OFF to preserve validated seed 2028 replay manifests.
+  private readonly adaptiveEtaEnabled = process.env.EVRAS_ADAPTIVE_ETA === '1';
+  private readonly etaTracker = new AdaptiveEtaTracker();
   private trafficRoutes: readonly DrivingRoute[] | null = null;
 
   constructor(
@@ -88,6 +92,7 @@ export class DemoSimulationService {
     this.simulation = this.createInitialSimulation();
     this.initialSimulation = this.simulation;
     this.state.initialize(this.simulation);
+    this.etaTracker.reset(this.simulation);
   }
 
   private createInitialSimulation(): SimulationState {
@@ -197,6 +202,7 @@ export class DemoSimulationService {
     this.trafficRoutes = null;
 
     this.state.initialize(this.simulation);
+    this.etaTracker.reset(this.simulation);
     this.gateway.publishReset();
 
     return {
@@ -259,6 +265,7 @@ export class DemoSimulationService {
     this.traffic = scenario;
     this.trafficRoutes = routes;
     this.state.initialize(this.simulation);
+    this.etaTracker.reset(this.simulation);
     this.gateway.publishReset();
 
     return {
@@ -297,6 +304,7 @@ export class DemoSimulationService {
     this.source = 'OSRM';
     this.traffic = scenario;
     this.state.initialize(this.simulation);
+    this.etaTracker.reset(this.simulation);
     this.gateway.publishReset();
 
     return {
@@ -346,6 +354,7 @@ export class DemoSimulationService {
     const gate = this.source === 'OSRM'
       ? createRoadEvidenceGate(this.topologies)
       : null;
+    if (this.adaptiveEtaEnabled) this.etaTracker.observe(next);
     const encounters = detectEncounters(
       { network: this.network, state: emergency },
       civilians,
@@ -354,6 +363,9 @@ export class DemoSimulationService {
         geometricCandidateDrivers.add(candidate.civilianVehicleId);
         return gate ? gate(candidate) : true;
       },
+      this.adaptiveEtaEnabled
+        ? (journey, distanceM) => this.etaTracker.estimate(journey, distanceM)
+        : undefined,
     );
 
     const events = this.state.update(next, encounters);
@@ -376,6 +388,7 @@ export class DemoSimulationService {
   reset() {
     this.simulation = this.initialSimulation;
     this.state.initialize(this.simulation);
+    this.etaTracker.reset(this.simulation);
     this.gateway.publishReset();
     return this.state.getOperatorSnapshot();
   }

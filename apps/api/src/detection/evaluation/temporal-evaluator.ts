@@ -1,5 +1,6 @@
 import { reconcileAlerts, type DriverAlert } from '../../alerts/domain/alert-manager.js';
 import { detectEncounters } from '../domain/encounter-detector.js';
+import { AdaptiveEtaTracker } from '../domain/adaptive-eta.js';
 import { createRoadEvidenceGate } from '../domain/road-evidence-gate.js';
 import { distanceMeters, getRoad, roadLengthMeters, createRoadNetwork } from '../../simulation/domain/road-network.js';
 import { advanceSimulation, createSimulation, type SimulationState, type SimulatedVehicle } from '../../simulation/domain/simulation.js';
@@ -218,7 +219,12 @@ export function measureSimulatedArrivals(scene: TemporalEncounterScenario): {
   return { ambulanceSeconds: arrivals[0], civilianSeconds: arrivals[1] };
 }
 
-export function evaluateTemporalScenario(scene: TemporalEncounterScenario): TemporalCaseResult {
+export type TemporalEtaMode = 'BASELINE' | 'ADAPTIVE';
+
+export function evaluateTemporalScenario(
+  scene: TemporalEncounterScenario,
+  mode: TemporalEtaMode = 'BASELINE',
+): TemporalCaseResult {
   validateScenario(scene);
   const actual = measureSimulatedArrivals(scene);
   const arrivalGap = actual.ambulanceSeconds !== null && actual.civilianSeconds !== null
@@ -227,15 +233,20 @@ export function evaluateTemporalScenario(scene: TemporalEncounterScenario): Temp
     arrivalGap !== null && arrivalGap <= CONFLICT_WINDOW_SECONDS;
 
   const { network, gate, state: initial } = createScene(scene);
+  const etaTracker = new AdaptiveEtaTracker();
   let state = initial;
   let active: readonly DriverAlert[] = [];
   const events: TimedAlertEvent[] = [];
   for (let timeMs = 0; timeMs <= MAX_SECONDS * 1000; timeMs += DETECTOR_STEP_MS) {
     state = applyScheduledSpeeds(state, scene);
+    if (mode === 'ADAPTIVE') etaTracker.observe(state);
     const candidates = detectEncounters(
       { network, state: state.vehicles[0] },
       [{ network, state: state.vehicles[1] }],
       {}, gate,
+      mode === 'ADAPTIVE'
+        ? (journey, distanceM) => etaTracker.estimate(journey, distanceM)
+        : undefined,
     );
     const reconciled = reconcileAlerts(active, candidates, timeMs);
     active = reconciled.active;
@@ -285,13 +296,14 @@ export function evaluateTemporalScenario(scene: TemporalEncounterScenario): Temp
 
 export function evaluateTemporalScenarios(
   scenes: readonly TemporalEncounterScenario[] = ALL_TEMPORAL_SCENARIOS,
+  mode: TemporalEtaMode = 'BASELINE',
 ): TemporalEvaluationReport {
   if (!scenes.length) throw new Error('At least one temporal scenario is required');
   const ids = new Set<string>();
   const cases = scenes.map((scene) => {
     if (ids.has(scene.id)) throw new Error(`Duplicate temporal case id: ${scene.id}`);
     ids.add(scene.id);
-    return evaluateTemporalScenario(scene);
+    return evaluateTemporalScenario(scene, mode);
   });
   const metrics = scoreLabeledPredictions(cases.map((item) => ({
     id: item.id, expectedAlert: item.independentlyExpectedEncounter, predictedAlert: item.anyWarningIssued,
