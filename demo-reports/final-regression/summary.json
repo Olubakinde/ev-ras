@@ -1,0 +1,486 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-22T05:49:28.272Z",
+  "passed": true,
+  "evaluationType": "SYNTHETIC_REGRESSION_NOT_REAL_WORLD_SAFETY",
+  "offline": {
+    "passed": true,
+    "findings": [
+      {
+        "pass": true,
+        "description": "Labeled report is explicitly synthetic"
+      },
+      {
+        "pass": true,
+        "description": "Labeled report uses topology-gated baseline"
+      },
+      {
+        "pass": true,
+        "description": "Labeled: samples stays at documented fixture baseline (17)"
+      },
+      {
+        "pass": true,
+        "description": "Labeled: truePositive stays at documented fixture baseline (6)"
+      },
+      {
+        "pass": true,
+        "description": "Labeled: falsePositive stays at documented fixture baseline (0)"
+      },
+      {
+        "pass": true,
+        "description": "Labeled: trueNegative stays at documented fixture baseline (9)"
+      },
+      {
+        "pass": true,
+        "description": "Labeled: falseNegative stays at documented fixture baseline (2)"
+      },
+      {
+        "pass": true,
+        "description": "Temporal: samples stays at documented fixture baseline (12)"
+      },
+      {
+        "pass": true,
+        "description": "Temporal: truePositive stays at documented fixture baseline (7)"
+      },
+      {
+        "pass": true,
+        "description": "Temporal: falsePositive stays at documented fixture baseline (1)"
+      },
+      {
+        "pass": true,
+        "description": "Temporal: trueNegative stays at documented fixture baseline (3)"
+      },
+      {
+        "pass": true,
+        "description": "Temporal: falseNegative stays at documented fixture baseline (1)"
+      },
+      {
+        "pass": true,
+        "description": "Labeled case connected-crossing classification matches independent label and detector verdict"
+      },
+      {
+        "pass": true,
+        "description": "Labeled case connected-crossing-from-north classification matches independent label and detector verdict"
+      },
+      {
+        "pass": true,
+        "description": "Labeled case connected-crossing-different-speed classification matches independent label and detector verdict"
+      },
+      {
+        "pass": true,
+        "description": "Labeled case slower-car-on-shared-road classification matches independent label and detector verdict"
+      },
+      {
+        "pass": true,
+        "description": "Labeled case opposing-traffic-on-shared-road classification matches independent label and detector verdict"
+      },
+      {
+        "pass": true,
+        "description": "Labeled case stopped-on-ambulance-route classification matches independent label and detector verdict"
+      },
+      {
+        "pass": true,
+        "description": "Labeled case connected-crossing-with-missing-annotation classification matches independent label and detector verdict"
+      },
+      {
+        "pass": true,
+        "description": "Labeled case stopped-on-road-with-missing-annotation classification matches independent label and detector verdict"
+      },
+      {
+        "pass": true,
+        "description": "Labeled case overpass-without-junction classification matches independent label and detector verdict"
+      },
+      {
+        "pass": true,
+        "description": "Labeled case far-parallel-road classification matches independent label and detector verdict"
+      },
+      {
+        "pass": true,
+        "description": "Labeled case geometrically-near-but-disconnected classification matches independent label and detector verdict"
+      },
+      {
+        "pass": true,
+        "description": "Labeled case crossing-arrival-too-late classification matches independent label and detector verdict"
+      },
+      {
+        "pass": true,
+        "description": "Labeled case crossing-outside-arrival-window classification matches independent label and detector verdict"
+      },
+      {
+        "pass": true,
+        "description": "Labeled case intersection-already-behind-driver classification matches independent label and detector verdict"
+      },
+      {
+        "pass": true,
+        "description": "Labeled case stationary-on-unrelated-road classification matches independent label and detector verdict"
+      },
+      {
+        "pass": true,
+        "description": "Labeled case ambulance-is-not-moving classification matches independent label and detector verdict"
+      },
+      {
+        "pass": true,
+        "description": "Labeled case connected-crossing-beyond-horizon classification matches independent label and detector verdict"
+      },
+      {
+        "pass": true,
+        "description": "Temporal case early-synchronized-crossing matches independent arrival label and detector verdict"
+      },
+      {
+        "pass": true,
+        "description": "Temporal case early-synchronized-crossing keeps its independently labeled baseline outcome"
+      },
+      {
+        "pass": true,
+        "description": "Temporal case late-synchronized-crossing matches independent arrival label and detector verdict"
+      },
+      {
+        "pass": true,
+        "description": "Temporal case late-synchronized-crossing keeps its independently labeled baseline outcome"
+      },
+      {
+        "pass": true,
+        "description": "Temporal case moderate-speed-crossing matches independent arrival label and detector verdict"
+      },
+      {
+        "pass": true,
+        "description": "Temporal case moderate-speed-crossing keeps its independently labeled baseline outcome"
+      },
+      {
+        "pass": true,
+        "description": "Temporal case overpass-no-road-connection matches independent arrival label and detector verdict"
+      },
+      {
+        "pass": true,
+        "description": "Temporal case overpass-no-road-connection keeps its independently labeled baseline outcome"
+      },
+      {
+        "pass": true,
+        "description": "Temporal case at-grade-missing-node-evidence matches independent arrival label and detector verdict"
+      },
+      {
+        "pass": true,
+        "description": "Temporal case at-grade-missing-node-evidence keeps its independently labeled baseline outcome"
+      },
+      {
+        "pass": true,
+        "description": "Temporal case civilian-arrives-too-late matches independent arrival label and detector verdict"
+      },
+      {
+        "pass": true,
+        "description": "Temporal case civilian-arrives-too-late keeps its independently labeled baseline outcome"
+      },
+      {
+        "pass": true,
+        "description": "Temporal case civilian-brakes-after-warning matches independent arrival label and detector verdict"
+      },
+      {
+        "pass": true,
+        "description": "Temporal case civilian-brakes-after-warning keeps its independently labeled baseline outcome"
+      },
+      {
+        "pass": true,
+        "description": "Temporal case civilian-accelerates-into-conflict matches independent arrival label and detector verdict"
+      },
+      {
+        "pass": true,
+        "description": "Temporal case civilian-accelerates-into-conflict keeps its independently labeled baseline outcome"
+      },
+      {
+        "pass": true,
+        "description": "Temporal case civilian-stop-and-go matches independent arrival label and detector verdict"
+      },
+      {
+        "pass": true,
+        "description": "Temporal case civilian-stop-and-go keeps its independently labeled baseline outcome"
+      },
+      {
+        "pass": true,
+        "description": "Temporal case approach-enters-prediction-horizon matches independent arrival label and detector verdict"
+      },
+      {
+        "pass": true,
+        "description": "Temporal case approach-enters-prediction-horizon keeps its independently labeled baseline outcome"
+      },
+      {
+        "pass": true,
+        "description": "Temporal case stationary-emergency-vehicle matches independent arrival label and detector verdict"
+      },
+      {
+        "pass": true,
+        "description": "Temporal case stationary-emergency-vehicle keeps its independently labeled baseline outcome"
+      },
+      {
+        "pass": true,
+        "description": "Temporal case both-slow-after-initial-warning matches independent arrival label and detector verdict"
+      },
+      {
+        "pass": true,
+        "description": "Temporal case both-slow-after-initial-warning keeps its independently labeled baseline outcome"
+      },
+      {
+        "pass": true,
+        "description": "No temporal benchmark cases have been added or silently dropped"
+      },
+      {
+        "pass": true,
+        "description": "Labeled reported samples matches case outcomes"
+      },
+      {
+        "pass": true,
+        "description": "Temporal reported samples matches case outcomes"
+      },
+      {
+        "pass": true,
+        "description": "Labeled reported truePositive matches case outcomes"
+      },
+      {
+        "pass": true,
+        "description": "Temporal reported truePositive matches case outcomes"
+      },
+      {
+        "pass": true,
+        "description": "Labeled reported falsePositive matches case outcomes"
+      },
+      {
+        "pass": true,
+        "description": "Temporal reported falsePositive matches case outcomes"
+      },
+      {
+        "pass": true,
+        "description": "Labeled reported trueNegative matches case outcomes"
+      },
+      {
+        "pass": true,
+        "description": "Temporal reported trueNegative matches case outcomes"
+      },
+      {
+        "pass": true,
+        "description": "Labeled reported falseNegative matches case outcomes"
+      },
+      {
+        "pass": true,
+        "description": "Temporal reported falseNegative matches case outcomes"
+      },
+      {
+        "pass": true,
+        "description": "Labeled confusion counts sum to fixture size"
+      },
+      {
+        "pass": true,
+        "description": "Temporal confusion counts sum to fixture size"
+      },
+      {
+        "pass": true,
+        "description": "Two known missing-evidence false negatives remain visible"
+      },
+      {
+        "pass": true,
+        "description": "Missing road evidence still withholds a warning (known tradeoff)"
+      },
+      {
+        "pass": true,
+        "description": "Grade-separated overpass remains unwarned"
+      },
+      {
+        "pass": true,
+        "description": "Temporal sampling remains 1s detector / 100ms independent arrival"
+      },
+      {
+        "pass": true,
+        "description": "No additional late true-positive warnings relative to fixture benchmark"
+      },
+      {
+        "pass": true,
+        "description": "Temporal first-warning ETA-error p90 does not exceed documented fixture tolerance (4.60s)"
+      },
+      {
+        "pass": true,
+        "description": "Temporal TP early-synchronized-crossing contains finite observed simulated lead time"
+      },
+      {
+        "pass": true,
+        "description": "Temporal TP late-synchronized-crossing contains finite observed simulated lead time"
+      },
+      {
+        "pass": true,
+        "description": "Temporal TP moderate-speed-crossing contains finite observed simulated lead time"
+      },
+      {
+        "pass": true,
+        "description": "Temporal TP civilian-accelerates-into-conflict contains finite observed simulated lead time"
+      },
+      {
+        "pass": true,
+        "description": "Temporal TP civilian-stop-and-go contains finite observed simulated lead time"
+      },
+      {
+        "pass": true,
+        "description": "Temporal TP approach-enters-prediction-horizon contains finite observed simulated lead time"
+      },
+      {
+        "pass": true,
+        "description": "Temporal TP both-slow-after-initial-warning contains finite observed simulated lead time"
+      },
+      {
+        "pass": true,
+        "description": "ETA comparison uses matched simulation warning timestamps"
+      },
+      {
+        "pass": true,
+        "description": "ETA comparison retains 14 synthetic cases"
+      },
+      {
+        "pass": true,
+        "description": "ETA comparison retains 151 matched observations"
+      },
+      {
+        "pass": true,
+        "description": "No warning classification changes between baseline and experimental estimator"
+      },
+      {
+        "pass": true,
+        "description": "Constant-speed mean ETA error does not exceed fixture tolerance (0.55s)"
+      },
+      {
+        "pass": true,
+        "description": "Experimental ETA error is measured, not assumed to be better"
+      }
+    ],
+    "baselineMode": "CONSTANT_SPEED; EVRAS_ADAPTIVE_ETA=0 on evaluation subprocesses",
+    "labeled": {
+      "samples": 17,
+      "truePositive": 6,
+      "falsePositive": 0,
+      "trueNegative": 9,
+      "falseNegative": 2,
+      "precision": 1,
+      "recall": 0.75,
+      "specificity": 1,
+      "f1": 0.8571428571428571,
+      "balancedAccuracy": 0.875
+    },
+    "temporal": {
+      "metrics": {
+        "samples": 12,
+        "truePositive": 7,
+        "falsePositive": 1,
+        "trueNegative": 3,
+        "falseNegative": 1,
+        "precision": 0.875,
+        "recall": 0.875,
+        "specificity": 0.75,
+        "f1": 0.875,
+        "balancedAccuracy": 0.8125
+      },
+      "lateTruePositiveWarnings": 1,
+      "warningLeadSeconds": {
+        "count": 7,
+        "min": 3.1377322486925014,
+        "mean": 18.926454975089907,
+        "median": 17.114903173790726,
+        "p90": 34.89214987141076,
+        "max": 44.34470950224076
+      },
+      "absoluteEtaPredictionErrorSeconds": {
+        "count": 7,
+        "min": 0,
+        "mean": 1.6393628974397847,
+        "median": 8.881784197001252e-15,
+        "p90": 4.590216113670551,
+        "max": 11.475540277066685
+      }
+    },
+    "etaComparison": {
+      "observations": 151,
+      "baselineMeanAbsoluteErrorSeconds": 0.5088975639760563,
+      "adaptiveMeanAbsoluteErrorSeconds": 0.5254013473014507,
+      "classificationChanges": 0
+    }
+  },
+  "live": {
+    "passed": true,
+    "findings": [
+      {
+        "pass": true,
+        "description": "Live evaluation is labeled synthetic operator traffic"
+      },
+      {
+        "pass": true,
+        "description": "Live traffic evaluated 12 seeds with 25 civilian vehicles each"
+      },
+      {
+        "pass": true,
+        "description": "Live operator scene includes 300 civilian driver-runs"
+      },
+      {
+        "pass": true,
+        "description": "Live traffic produced at least one modeled alert"
+      },
+      {
+        "pass": true,
+        "description": "All live created alerts were eventually cleared"
+      },
+      {
+        "pass": true,
+        "description": "No modeled warnings remain active at end of replay"
+      },
+      {
+        "pass": true,
+        "description": "Ambulance source route fingerprint is present"
+      },
+      {
+        "pass": true,
+        "description": "Per-seed created warning totals reconcile"
+      }
+    ],
+    "results": {
+      "seeds": [
+        2026,
+        2027,
+        2028,
+        2029,
+        2030,
+        2031,
+        2032,
+        2033,
+        2034,
+        2035,
+        2036,
+        2037
+      ],
+      "eventTotals": {
+        "CREATED": 117,
+        "UPDATED": 989,
+        "CLEARED": 117
+      },
+      "predictedEmergencyEtaAtCreationSeconds": {
+        "samples": 117,
+        "missing": 0,
+        "min": 0,
+        "p10": 1.653,
+        "median": 10.951,
+        "mean": 15.262,
+        "p90": 34.833,
+        "max": 43.206,
+        "below5": 35,
+        "below10": 51
+      },
+      "supportedCandidateObservations": 1106,
+      "suppressedCandidateObservations": 67
+    }
+  },
+  "checksExecuted": [
+    "API tests",
+    "API build",
+    "API lint",
+    "Web tests",
+    "Web typecheck",
+    "Web build",
+    "Script regression tests",
+    "Labeled synthetic evaluation",
+    "Temporal synthetic evaluation",
+    "Constant vs experimental ETA",
+    "Live operator API 12-seed traffic replay"
+  ]
+}
