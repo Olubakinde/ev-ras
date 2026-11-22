@@ -8,6 +8,7 @@ import {
 } from '../simulation/domain/road-network.js';
 
 import { parseOsrmNodeAnnotations } from './osrm-node-annotations.js';
+import { recoverMatchingNodeAnnotations } from './topology-recovery.js';
 
 export interface DrivingRoute {
   readonly distanceMeters: number;
@@ -83,6 +84,7 @@ export class OsrmClient {
     private readonly request: typeof fetch = globalThis.fetch,
     private readonly baseUrl: string =
       process.env.OSRM_BASE_URL ?? 'https://router.project-osrm.org',
+    private readonly retryMissingTopology = false,
   ) {}
 
   async getDrivingRoute(
@@ -148,10 +150,38 @@ export class OsrmClient {
       route.legs,
     );
     const points = parseCoordinates(rawCoordinates);
-    const topologyNodes =
+    let topologyNodes =
       Array.isArray(rawCoordinates) && rawCoordinates.length === points.length
         ? originalTopology
         : undefined;
+
+    // Best-effort recovery from the routing provider itself. Never derive
+    // intersection identity from coordinate proximity. Retry only when
+    // the original raw route can be mapped 1:1 to simulation vertices.
+    if (
+      this.retryMissingTopology &&
+      topologyNodes === undefined &&
+      Array.isArray(rawCoordinates) &&
+      rawCoordinates.length === points.length
+    ) {
+      const retryUrl = new URL(url.toString());
+      retryUrl.searchParams.set('steps', 'true');
+      try {
+        const retryResponse = await this.request(retryUrl.toString(), {
+          signal: AbortSignal.timeout(8_000),
+        });
+        if (retryResponse.ok) {
+          const retryPayload: unknown = await retryResponse.json();
+          topologyNodes = recoverMatchingNodeAnnotations(
+            rawCoordinates,
+            retryPayload,
+          );
+        }
+      } catch {
+        // Keep the first valid driving route, but withhold OSM evidence.
+        // A failed retry must never turn a valid route into an alert.
+      }
+    }
 
     const segments: RoadSegment[] = [];
     for (let i = 1; i < points.length; i++) {
