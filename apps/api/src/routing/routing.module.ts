@@ -9,7 +9,7 @@ import { RoutingController } from './routing.controller.js';
   providers: [
     {
       provide: OsrmClient,
-      useFactory: () => new OsrmClient(),
+      useFactory: () => new OsrmClient(undefined, undefined, true),
     },
   ],
   exports: [OsrmClient],
